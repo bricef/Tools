@@ -2,7 +2,7 @@
 
 ## About 
 
-this repsoitory holds the collected tools and utilities I've developed for myslef over the years.
+This repository holds the collected tools and utilities I've developed for myself over the years.
 
 ## See also 
 

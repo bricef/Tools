@@ -8,7 +8,7 @@ this repsoitory holds the collected tools and utilities I've developed for mysle
 
 The [Coding Challenges Repository](https://github.com/bricef/coding-challenges) which includes sevreal fully fucntioning tools and utilities.
 
-My [Dotfiles](https://github.com/bricef/coding-challenges) which also includ some tools and utilities.
+My [Dotfiles](https://github.com/bricef/coding-challenges) which also include some tools and utilities.
 
 ## Completed Tools
 

@@ -1,0 +1,539 @@
+abi-dalzim's horrid wilting
+absorb elements
+aganazzar's scorcher
+beast bond
+bones of the earth
+catapult
+control flames
+control winds
+create bonfire
+dust devil
+earth tremor
+earthbind
+elemental bane
+erupting earth
+flame arrows
+frostbite
+gust
+ice knife
+immolation
+investiture of flame
+investiture of ice
+investiture of stone
+investiture of wind
+maelstrom
+magic stone
+maximilian's earthen grasp
+melf's minute meteors
+mold earth
+primordial ward
+pyrotechnics
+shape water
+skywrite
+snilloc's snowball swarm
+storm sphere
+thunderclap
+tidal wave
+transmute rock
+vitriolic sphere
+wall of sand
+wall of water
+warding wind
+watery sphere
+whirlwind
+acid splash
+aid
+alarm
+alter self
+animal friendship
+animal messenger
+animal shapes
+animate dead
+animate objects
+antilife shell
+antimagic field
+antipathy/sympathy
+arcane eye
+arcane gate
+arcane lock
+armor of agathys
+arms of hadar
+astral projection
+augury
+aura of life
+aura of purity
+aura of vitality
+awaken
+bane
+banishing smite
+banishment
+barkskin
+beacon of hope
+beast sense
+bestow curse
+bigby's hand
+blade barrier
+blade ward
+bless
+blight
+blinding smite
+blindness/deafness
+blink
+blur
+branding smite
+burning hands
+call lightning
+calm emotions
+chain lightning
+charm person
+chill touch
+chromatic orb
+circle of death
+circle of power
+clairvoyance
+clone
+cloud of daggers
+cloudkill
+color spray
+command
+commune
+commune with nature
+compelled duel
+comprehend languages
+compulsion
+cone of cold
+confusion
+conjure animals
+conjure barrage
+conjure celestial
+conjure elemental
+conjure fey
+conjure minor elementals
+conjure volley
+conjure woodland beings
+contact other plane
+contagion
+contingency
+continual flame
+control water
+control weather
+cordon of arrows
+counterspell
+create food and water
+create undead
+create or destroy water
+creation
+crown of madness
+crusader's mantle
+cure wounds
+dancing lights
+darkness
+darkvision
+daylight
+death ward
+delayed blast fireball
+demiplane
+destructive wave
+detect evil and good
+detect magic
+detect poison and disease
+detect thoughts
+dimension door
+disguise self
+disintegrate
+dispel evil and good
+dispel magic
+dissonant whispers
+divination
+divine favor
+divine word
+dominate beast
+dominate monster
+dominate person
+drawmij's instant summon
+dream
+druidcraft
+earthquake
+eldritch blast
+elemental weapon
+enhance ability
+enlarge/reduce
+ensnaring strike
+entangle
+enthrall
+etherealness
+evard's black tentacles
+expeditious retreat
+eyebite
+fabricate
+faerie fire
+false life
+fear
+feather fall
+feeblemind
+feign death
+find familiar
+find steed
+find traps
+find the path
+finger of death
+fire bolt
+fire shield
+fire storm
+fireball
+flame blade
+flame strike
+flaming sphere
+flesh to stone
+fly
+fog cloud
+forbiddance
+forcecage
+foresight
+freedom of movement
+friends
+gaseous form
+gate
+geas
+gentle repose
+giant insect
+glibness
+globe of invulnerability
+glyph of warding
+goodberry
+grasping vine
+grease
+greater invisibility
+greater restoration
+guardian of faith
+guards and wards
+guidance
+guiding bolt
+gust of wind
+hail of thorns
+hallow
+hallucinatory terrain
+harm
+haste
+heal
+healing word
+heat metal
+hellish rebuke
+heroes' feast
+heroism
+hex
+hold monster
+hold person
+holy aura
+hunger of hadar
+hunter's mark
+hypnotic pattern
+ice storm
+identify
+illusory script
+imprisonment
+incendiary cloud
+inflict wounds
+insect plague
+invisibility
+jump
+knock
+legend lore
+leomund's secret chest
+leomund's tiny hut
+lesser restoration
+levitate
+light
+lightning arrow
+lightning bolt
+locate animals or plants
+locate creature
+locate object
+longstrider
+mage armor
+mage hand
+magic circle
+magic jar
+magic missile
+magic mouth
+magic weapon
+major image
+mass cure wounds
+mass heal
+mass healing word
+mass suggestion
+maze
+meld into stone
+melf's acid arrow
+mending
+message
+meteor swarm
+mind blank
+minor illusion
+mirage arcane
+mirror image
+mislead
+misty step
+modify memory
+moonbeam
+mordenkainen's faithful hound
+mordenkainen's magnificent mansion
+mordenkainen's private sanctum
+mordenkainen's sword
+move earth
+nondetection
+nystul's magic aura
+otiluke's freezing sphere
+otiluke's resilient sphere
+otto's irresistible dance
+pass without trace
+passwall
+phantasmal force
+phantasmal killer
+phantom steed
+planar ally
+planar binding
+plane shift
+plant growth
+poison spray
+polymorph
+power word heal
+power word kill
+power word stun
+prayer of healing
+prestidigitation
+prismatic spray
+prismatic wall
+produce flame
+programmed illusion
+project image
+protection from energy
+protection from evil and good
+protection from poison
+purify food and drink
+raise dead
+rary's telepathic bond
+ray of enfeeblement
+ray of frost
+ray of sickness
+regenerate
+reincarnate
+remove curse
+resistance
+resurrection
+reverse gravity
+revivify
+rope trick
+sacred flame
+sanctuary
+scorching ray
+scrying
+searing smite
+see invisibility
+seeming
+sending
+sequester
+shapechange
+shatter
+shield
+shield of faith
+shillelagh
+shocking grasp
+silence
+silent image
+simulacrum
+sleep
+sleet storm
+slow
+spare the dying
+speak with animals
+speak with dead
+speak with plants
+spider climb
+spike growth
+spirit guardians
+spiritual weapon
+staggering smite
+stinking cloud
+stone shape
+stoneskin
+storm of vengeance
+suggestion
+sunbeam
+sunburst
+swift quiver
+symbol
+tasha's hideous laughter
+telekinesis
+telepathy
+teleport
+teleportation circle
+tenser's floating disk
+thaumaturgy
+thorn whip
+thunderous smite
+thunderwave
+time stop
+tongues
+transport via plants
+tree stride
+true polymorph
+true resurrection
+true seeing
+true strike
+tsunami
+unseen servant
+vampiric touch
+vicious mockery
+wall of fire
+wall of force
+wall of ice
+wall of stone
+wall of thorns
+warding bond
+water breathing
+water walk
+web
+weird
+wind walk
+wind wall
+wish
+witch bolt
+word of recall
+wrathful smite
+zone of truth
+booming blade
+green-flame blade
+lightning lure
+sword burst
+arcane hacking (ua)
+commune with city (ua)
+conjure knowbot (ua)
+digital phantom (ua)
+find vehicle (ua)
+haywire (ua)
+infallible relay (ua)
+invisibility to cameras (ua)
+on/off (ua)
+protection from ballistics (ua)
+remote access (ua)
+shutdown (ua)
+synchronicity (ua)
+system backdoor (ua)
+cause fear (ua)
+ceremony (ua)
+chaos bolt (ua)
+guiding hand (ua)
+hand of radiance (ua)
+healing elixir (ua)
+infestation (ua)
+primal savagery (ua)
+puppet (ua)
+sense emotion (ua)
+snare (ua)
+sudden awakening (ua)
+toll the dead (ua)
+unearthly chorus (ua)
+virtue (ua)
+wild cunning (ua)
+zephyr strike (ua)
+conjure barlgura (ua)
+conjure hezrou (ua)
+conjure lesser demon (ua)
+conjure shadow demon (ua)
+conjure vrock (ua)
+abi-dalzim's horrid wilting
+absorb elements
+aganazzar's scorcher
+beast bond
+bones of the earth
+catapult
+catnap
+cause fear
+ceremony
+chaos bolt
+charm monster
+control flames
+control winds
+create bonfire
+create homunculus
+crown of stars
+danse macabre
+dawn
+dragon's breath
+druid grove
+dust devil
+earth tremor
+earthbind
+elemental bane
+enemies abound
+enervation
+erupting earth
+far step
+find greater steed
+flame arrows
+frostbite
+guardian of nature
+gust
+healing spirit
+holy weapon
+ice knife
+illusory dragon
+immolation
+infernal calling
+infestation
+investiture of flame
+investiture of ice
+investiture of stone
+investiture of wind
+invulnerability
+life transference
+maddening darkness
+maelstrom
+magic stone
+mass polymorph
+maximilian's earthen grasp
+melf's minute meteors
+mental prison
+mighty fortress
+mind spike
+mold earth
+negative energy flood
+power word pain
+primal savagery
+primordial ward
+psychic scream
+pyrotechnics
+scatter
+shadow blade
+shadow of moil
+shape water
+sickening radiance
+skill empowerment
+skywrite
+snare
+snilloc's snowball swarm
+soul cage
+steel wind strike
+storm sphere
+summon greater demon
+summon lesser demons
+synaptic static
+temple of the gods
+tenser's transformation
+thunder step
+thunderclap
+tidal wave
+tiny servant
+toll the dead
+transmute rock
+vitriolic sphere
+wall of light
+wall of sand
+wall of water
+warding wind
+watery sphere
+whirlwind
+word of radiance
+wrath of nature
+zephyr strike

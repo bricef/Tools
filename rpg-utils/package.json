@@ -1,0 +1,21 @@
+{
+  "name": "generators",
+  "version": "0.0.1",
+  "description": "D&D generators",
+  "main": "gen.js",
+  "scripts": {
+    "test": "node gen.js --test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "collections": "^5.1.12",
+    "lodash": "^4.17.20",
+    "word-wrap": "^1.2.3"
+  },
+  "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-cli": "^6.26.0"
+  }
+}

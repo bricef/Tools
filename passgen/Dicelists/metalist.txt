@@ -1,0 +1,17 @@
+Afrikaans-dice.txt
+Croatian-dice.txt
+Czech-dice.txt
+English-dice.txt
+Finnish-dice.txt
+French-dice.txt
+Hungarian-dice.txt
+Italian-dice.txt
+Japanese-dice.txt
+Latin-dice.txt
+Norwegian-dice.txt
+Polish-dice.txt
+Spanish-dice.txt
+Swahili-dice.txt
+Swedish-dice.txt
+Turkish-dice.txt
+diceware-wordlist.txt

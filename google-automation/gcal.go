@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/user"
+	"path/filepath"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -15,12 +17,24 @@ import (
 	"google.golang.org/api/option"
 )
 
+func getConfigdir() string {
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	path := filepath.Join(dir, ".config", "gcal")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err := os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			log.Fatalf("Could not create config directory '%v'", path)
+		}
+	}
+	return path
+}
+
 // Retrieve a token, saves the token, then returns the generated client.
-func getClient(config *oauth2.Config) *http.Client {
+func getClient(tokFile string, config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := "token.json"
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok = getTokenFromWeb(config)
@@ -70,28 +84,45 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func main() {
+func getCalendarService() *calendar.Service {
+	configDir := getConfigdir()
+	credPath := filepath.Join(configDir, "credentials.json")
+	tokenPath := filepath.Join(configDir, "token.json")
+
 	ctx := context.Background()
-	b, err := os.ReadFile("credentials.json")
+	b, err := os.ReadFile(credPath)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
 
-	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, calendar.CalendarReadonlyScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
-	client := getClient(config)
+	client := getClient(tokenPath, config)
 
 	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
 	if err != nil {
 		log.Fatalf("Unable to retrieve Calendar client: %v", err)
 	}
 
+	return srv
+}
+
+type Event struct {
+	Summary string
+	AllDay  bool
+	Start   time.Time
+	Type    string
+}
+
+func getEvents(srv *calendar.Service) []Event {
+	events := make([]Event, 0)
+
 	t := time.Now().Format(time.RFC3339)
 	t2 := time.Now().AddDate(0, 0, 10).Format(time.RFC3339)
-	events, err := srv.Events.List("primary").
+
+	items, err := srv.Events.List("primary").
 		ShowDeleted(false).
 		SingleEvents(true).
 		TimeMin(t).
@@ -100,37 +131,65 @@ func main() {
 		Do()
 
 	if err != nil {
-		log.Fatalf("Unable to retrieve next ten of the user's events: %v", err)
+		log.Fatalf("Unable to retrieve the user's events: %v", err)
 	}
-	fmt.Println("Upcoming events:")
-	if len(events.Items) == 0 {
+
+	for _, item := range items.Items {
+		var allDay bool
+		var start time.Time
+
+		date := item.Start.DateTime
+
+		if date == "" { // Whole day event
+			allDay = true
+			start, err = time.Parse("2006-01-02", item.Start.Date)
+			if err != nil {
+				log.Fatalf("Could not parse date '%v'", item.Start.Date)
+			}
+		}
+		if date != "" {
+			start, err = time.Parse(time.RFC3339, date)
+			if err != nil {
+				log.Fatalf("Could not parse datetime '%v'", date)
+			}
+		}
+
+		events = append(events, Event{
+			Summary: item.Summary,
+			AllDay:  allDay,
+			Start:   start,
+			Type:    item.EventType,
+		})
+
+	}
+
+	return events
+}
+
+func main() {
+	srv := getCalendarService()
+	events := getEvents(srv)
+
+	if len(events) == 0 {
 		fmt.Println("No upcoming events found.")
 	} else {
 		currentDay := time.Now()
-
-		for _, item := range events.Items {
-			date := item.Start.DateTime
-
-			var et time.Time
-			if date == "" { // Whole day event
-				eventDay, err := time.Parse("2006-01-02", item.Start.Date)
-				if err != nil {
-					log.Fatalf("Could not parse date '%v'", item.Start.Date)
-				}
-				if currentDay.Day() != eventDay.Day() {
-					currentDay = eventDay
-					fmt.Printf("\n### %v\n\n", currentDay.Format("Monday 02"))
-				}
-				fmt.Printf("- **%v**\n", item.Summary)
+		for _, event := range events {
+			if event.Type == "focusTime" ||
+				event.Type == "workingLocation" ||
+				event.Type == "outOfOffice" ||
+				event.Summary == "🥗 Lunch" {
+				continue
 			}
-			if date != "" {
-				et, err = time.Parse(time.RFC3339, date)
-				if err != nil {
-					log.Fatalf("Could not parse datetime '%v'", date)
-				}
-				fmt.Printf("- [<] %v - %v\n", et.Format("15:04"), item.Summary)
+			if currentDay.Day() != event.Start.Day() {
+				currentDay = event.Start
+				fmt.Printf("\n### %v\n\n", currentDay.Format("Monday 02"))
 			}
-
+			if event.AllDay {
+				fmt.Printf("- **%v**\n", event.Summary)
+			} else {
+				fmt.Printf("- [<] %v - %v\n", event.Start.Format("15:04"), event.Summary)
+			}
 		}
 	}
 }

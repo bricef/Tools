@@ -1,6 +1,7 @@
 # Password Generation Utilities
 
 ## Using dice lists
+
 Run the `dicegen.sh` executable with the number of word:
 
 ```
@@ -13,9 +14,10 @@ fichar
 ```
 
 ## Using the PGP word list
+
 You can generate a passphrase using the PGP word list as well
 ```
-$ ./gpgwords.py --gen
+$ ./pgpwords.py --gen
 60 43 95 9e e0 23 3b e1 3a 63 b7 26 8d 5c 59 b9
 facial       decimal      preclude     onlooker
 tapeworm     cannonball   clockwork    tolerance

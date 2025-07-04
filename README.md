@@ -17,7 +17,7 @@ My [Dotfiles](https://github.com/bricef/coding-challenges) which also include so
 - [**bmenu**](./bmenu/) is a simple menu generator that uses a simple text-based definition format.
 - [**passgen**](./passgen/) includes tools and scripts for generating passwords and passphrases.
 - [**rpg-utils**](./rpg-utils/) includes tools and utilities for Table Top Roleplaying Games, such as dice rollers and generators.
-- [**doctools**](./doctools/) hast tools and utilities to manipulate documents and convert them into PDF
+- [**doctools**](./doctools/) has tools and utilities to manipulate documents and convert them into PDF
 
 ## Work in Progress
 

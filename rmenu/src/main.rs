@@ -3,7 +3,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
 
-use eframe::egui::{self, ViewportCommand};
+use eframe::egui::{self, ViewportCommand, Key};
 
 fn main() -> eframe::Result {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
@@ -33,6 +33,16 @@ impl eframe::App for MyApp {
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         ctx.set_pixels_per_point(2.0);
+        ctx.input(|inp| {
+            if inp.key_pressed(Key::Escape) {
+                println!("Key 'Escape' was just pressed");
+                // have to use a thread to send the viewport command for some asinine reason
+                let ctx = ctx.clone();
+                std::thread::spawn(move || {
+                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                });
+            }
+        });
         custom_window_frame(ctx, "egui with custom frame", |ui| {
             ui.label("This is just the contents of the window.");
             ui.horizontal(|ui| {
@@ -130,39 +140,39 @@ fn title_bar_ui(ui: &mut egui::Ui, title_bar_rect: eframe::epaint::Rect, title: 
 
 /// Show some close/maximize/minimize buttons for the native window.
 fn close_maximize_minimize(ui: &mut egui::Ui) {
-    use egui::{Button, RichText};
+    // use egui::{Button, RichText};
 
-    let button_height = 12.0;
+    // let button_height = 12.0;
 
-    let close_response = ui
-        .add(Button::new(RichText::new("❌").size(button_height)))
-        .on_hover_text("Close the window");
-    if close_response.clicked() {
-        ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
-    }
+    // let close_response = ui
+    //     .add(Button::new(RichText::new("❌").size(button_height)))
+    //     .on_hover_text("Close the window");
+    // if close_response.clicked() {
+    //     ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close);
+    // }
 
-    let is_maximized = ui.input(|i| i.viewport().maximized.unwrap_or(false));
-    if is_maximized {
-        let maximized_response = ui
-            .add(Button::new(RichText::new("🗗").size(button_height)))
-            .on_hover_text("Restore window");
-        if maximized_response.clicked() {
-            ui.ctx()
-                .send_viewport_cmd(ViewportCommand::Maximized(false));
-        }
-    } else {
-        let maximized_response = ui
-            .add(Button::new(RichText::new("🗗").size(button_height)))
-            .on_hover_text("Maximize window");
-        if maximized_response.clicked() {
-            ui.ctx().send_viewport_cmd(ViewportCommand::Maximized(true));
-        }
-    }
+    // let is_maximized = ui.input(|i| i.viewport().maximized.unwrap_or(false));
+    // if is_maximized {
+    //     let maximized_response = ui
+    //         .add(Button::new(RichText::new("🗗").size(button_height)))
+    //         .on_hover_text("Restore window");
+    //     if maximized_response.clicked() {
+    //         ui.ctx()
+    //             .send_viewport_cmd(ViewportCommand::Maximized(false));
+    //     }
+    // } else {
+    //     let maximized_response = ui
+    //         .add(Button::new(RichText::new("🗗").size(button_height)))
+    //         .on_hover_text("Maximize window");
+    //     if maximized_response.clicked() {
+    //         ui.ctx().send_viewport_cmd(ViewportCommand::Maximized(true));
+    //     }
+    // }
 
-    let minimized_response = ui
-        .add(Button::new(RichText::new("🗕").size(button_height)))
-        .on_hover_text("Minimize the window");
-    if minimized_response.clicked() {
-        ui.ctx().send_viewport_cmd(ViewportCommand::Minimized(true));
-    }
+    // let minimized_response = ui
+    //     .add(Button::new(RichText::new("🗕").size(button_height)))
+    //     .on_hover_text("Minimize the window");
+    // if minimized_response.clicked() {
+    //     ui.ctx().send_viewport_cmd(ViewportCommand::Minimized(true));
+    // }
 }

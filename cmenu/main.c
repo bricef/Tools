@@ -7,7 +7,7 @@ void filter_by_prefix(
     const char* prefix, 
     const char** options, 
     const int options_count, 
-    char** filtered_options, 
+    const char** filtered_options, 
     int* filtered_options_count
 ) {
     if (prefix == NULL || prefix[0] == '\0') {
@@ -36,12 +36,47 @@ typedef struct {
 void setup(const Config* config){
     // Ensure window gets rendered without decorations
     SetTraceLogLevel(LOG_ERROR); 
-    SetWindowState(FLAG_WINDOW_UNDECORATED);
+    SetWindowState(FLAG_WINDOW_UNDECORATED|FLAG_WINDOW_HIGHDPI);
 
     InitWindow(600, 300, "rmenu");
     SetTargetFPS(60);
 }
 
+
+/*
+-b     dmenu appears at the bottom of the screen.
+
+-i     dmenu matches menu items case insensitively.
+
+-l lines
+        dmenu lists items vertically, with the given number of lines.
+
+-m monitor
+        dmenu is displayed on the monitor number supplied. Monitor numbers are starting from 0.
+
+-p prompt
+        defines the prompt to be displayed to the left of the input field.
+
+-fn font
+        defines the font or font set used.
+
+-nb color
+        defines the normal background color.  #RGB, #RRGGBB, and X color names are supported.
+
+-nf color
+        defines the normal foreground color.
+
+-sb color
+        defines the selected background color.
+
+-sf color
+        defines the selected foreground color.
+
+-v     prints version information to stdout, then exits.
+
+-w windowid
+        embed into windowid.
+*/
 
 Config parse_args(int argc, char** argv){
     Config config;
@@ -71,10 +106,10 @@ Input parse_input(const Config* config){
 typedef struct {
     int active;
     int scrollIndex;
-    char** options;
+    const char** options;
     int options_count;
     int filtered_options_count;
-    char** filtered_options;
+    const char** filtered_options;
     int focus;
     char text[255];
 } State;
@@ -88,6 +123,7 @@ State new_state(const Config* config, const Input* input){
     state.options_count = input->input_count;
     state.options = input->options;
     state.filtered_options_count = 0;
+    state.filtered_options = (const char**) malloc(input->input_count * sizeof(const char*));
     return state;
 }
 
@@ -109,10 +145,10 @@ void run(State* state){
         sprintf(active_str, "Active: %d", state->active);
 
         filter_by_prefix(
-            &state->text, 
-            &state->options, 
+            state->text, 
+            state->options, 
             state->options_count, 
-            &state->filtered_options, 
+            state->filtered_options, 
             &state->filtered_options_count
         );
 
@@ -123,14 +159,14 @@ void run(State* state){
 
             GuiTextBox(
                 (Rectangle){ 10, 10, 200, 30 }, 
-                &state->text, 
+                state->text, 
                 30, 
                 true
             );
             
             GuiListViewEx(
                 (Rectangle){ 250, 40, 200, 200 }, 
-                (const char**) &state->filtered_options, 
+                state->filtered_options, 
                 state->filtered_options_count,  
                 &state->scrollIndex, 
                 &state->active, 

@@ -55,8 +55,8 @@ Input* input_from_stdin(void){
 }
 
 void input_free(Input* input){
-    for (size_t i = 0; i < input->input_count; i++) {
-        free(input->options[i]);
+    for (int i = 0; i < input->input_count; i++) {
+        free((void *)input->options[i]);
     }
     free(input->options);
     free(input);

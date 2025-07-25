@@ -1,13 +1,10 @@
 #include "raylib.h"
-#include <unistd.h>
 
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 #include "cmenu.h"
-
-
 
 Input* input_from_stdin(void){
     // TODO: Read from stdin

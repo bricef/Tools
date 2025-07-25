@@ -15,6 +15,7 @@ State* new_state(const Config* config, const Input* input){
     state->filtered_options_count = 0;
     state->filtered_options = (const char**) malloc(input->input_count * sizeof(const char*));
     panic_if_null(state->filtered_options);
+    
     return state;
 }
 

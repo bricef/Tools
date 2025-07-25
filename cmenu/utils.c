@@ -10,6 +10,7 @@ void error(const char* message){
 
 void panic_if_null(void* ptr){
     if (ptr == NULL){
-        error("Memory allocation failed");
+        fwrite("Memory allocation failed\n", 1, 25, stderr);
+        exit(1);
     }
 }

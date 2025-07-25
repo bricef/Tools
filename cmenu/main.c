@@ -7,16 +7,17 @@
 
 #include "cmenu.h"
 
-void error(const char* message){
-    fprintf(stderr, "Error: %s\n", message);
-    exit(1);
-}
+
 
 Input* input_from_stdin(void){
     // TODO: Read from stdin
-    Input* input = (Input*) malloc(sizeof(Input));
+    Input* input = (Input*) malloc(sizeof(Input)); 
+    panic_if_null(input);
+    
     input->input_count = 6;
     input->options = (const char**) malloc(input->input_count * sizeof(const char*));
+    panic_if_null(input->options);
+    
     input->options[0] = "Alpha";
     input->options[1] = "Bravo";
     input->options[2] = "Charlie";
@@ -63,7 +64,7 @@ void position_window(const Config* config){
     SetWindowPosition(x, y);
 }
 
-void handle_input(State* state){
+void handle_input(State* state){ // Could make state immutable by returning a new state
     if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_RIGHT)) {
         // printf("DOWN\n");
         state_select_next(state);
@@ -99,7 +100,6 @@ void run(State* state, const Config* config){
     while (!WindowShouldClose()){
         position_window(config);
         handle_input(state);
-        
         state_filter(state);
 
         // Draw

@@ -4,6 +4,8 @@
 
 State* new_state(const Config* config, const Input* input){
     State* state = (State*) malloc(sizeof(State));
+    panic_if_null(state);
+
     state->active = 0;
     state->scrollIndex = 0;
     state->focus = 0;
@@ -12,6 +14,7 @@ State* new_state(const Config* config, const Input* input){
     state->options = input->options;
     state->filtered_options_count = 0;
     state->filtered_options = (const char**) malloc(input->input_count * sizeof(const char*));
+    panic_if_null(state->filtered_options);
     return state;
 }
 

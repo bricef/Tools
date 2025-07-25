@@ -52,6 +52,8 @@ Config* config_new(
     int padding
 ){
     Config* config = (Config*) malloc(sizeof(Config));
+    panic_if_null(config);
+    
     config->monitor = monitor;
     config->bottom = bottom;
     config->center = center;

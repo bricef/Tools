@@ -1,7 +1,10 @@
+
+#include <stdbool.h>
+
 #ifndef CMENU_H
 #define CMENU_H
 
-#include <stdbool.h>
+
 
 typedef struct {
     bool bottom;
@@ -38,11 +41,15 @@ typedef struct {
     char text[255];
 } State;
 
-// Function declarations
 State* new_state(const Config* config, const Input* input);
 void state_free(State* state);
 void state_select_next(State* state);
 void state_select_previous(State* state);
 void state_filter(State* state);
+
+
+// Utils
+void error(const char* message);
+void panic_if_null(void* ptr);
 
 #endif // CMENU_H

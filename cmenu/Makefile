@@ -37,7 +37,7 @@ CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
 CFLAGS += -I./lib/ -I./lib/args/src/
 CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-parameter -Wno-unused-but-set-variable
 
-FILES = main.c config.c state.c
+FILES = main.c config.c state.c utils.c
 
 DEPS = lib/args/src/args.c
 

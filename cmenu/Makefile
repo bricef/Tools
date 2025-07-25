@@ -1,4 +1,4 @@
-.PHONY: run clean all install-deps
+.PHONY: run clean all install-deps debug
 
 # Try to get raylib flags from pkg-config, fallback to manual flags if not found
 RAYLIB_PKG_CONFIG := $(shell pkg-config --exists raylib && echo "yes" || echo "no")
@@ -34,29 +34,45 @@ endif
 
 # Always include necessary system libraries
 CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
-CFLAGS += -I./lib/ -I./lib/args/src/
-CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-parameter -Wno-unused-but-set-variable
+CFLAGS += -I./lib/ -I./lib/args/src/ -I./build/
+CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
+
 
 FILES = main.c config.c state.c utils.c
 
 DEPS = lib/args/src/args.c
 
+
 all: target/cmenu
 
-target/cmenu: $(FILES) target
-	gcc -o target/cmenu $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)	
+target/cmenu: $(FILES) target fonts
+	gcc -o $@ $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)	
 
-target/cmenu-debug: $(FILES) target
-	gcc -g3 -o target/cmenu-debug $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)
+target/cmenu-debug: $(FILES) target fonts
+	gcc -g3 -o $@ $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)
 
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit
+
+fonts: build/font_mecha.h
+
+build/font_%.h: fonts/%.png build 
+	xxd -i < ${<} > $@.xxd
+	NAME=font_$(subst fonts/,,$(basename ${<}));\
+	echo "const unsigned char $$NAME []= {" > build/prefix; \
+	echo "};" > build/suffix
+	cat build/prefix ${@}.xxd build/suffix > $@
+	rm build/prefix build/suffix build/*.xxd
 
 run: target/cmenu
 	./target/cmenu
 
 clean:
 	rm -rf target/
+	rm -rf build/
+
+build:
+	mkdir -p build
 
 target:
 	mkdir -p target

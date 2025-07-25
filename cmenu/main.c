@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "raylib.h"
 
 
@@ -5,6 +6,7 @@
 #include "raygui.h"
 
 #include "cmenu.h"
+#include "build/font_mecha.h"
 
 Input* input_from_stdin(void){
 
@@ -126,7 +128,7 @@ void handle_input(State* state){ // Could make state immutable by returning a ne
 }
 
 
-void run(State* state, const Config* config){
+void run(State* state, const Config* config, Font font){
     while (!WindowShouldClose()){
         position_window(config);
         handle_input(state);
@@ -140,11 +142,12 @@ void run(State* state, const Config* config){
             
             if(config->prompt != NULL && config->prompt[0] != '\0'){
                 int prompt_width = MeasureText(config->prompt, config->font_size) + config->padding * 2;
-                DrawText(
+                DrawTextEx(
+                    font,
                     config->prompt,
-                    offset_x + config->padding,
-                    offset_y + config->padding,
+                    (Vector2){ offset_x + config->padding, offset_y + config->padding },
                     config->font_size,
+                    0,
                     BLACK // TODO: Get color from config
                 );
                 offset_x += prompt_width;
@@ -203,8 +206,28 @@ int main(int argc, char** argv)
     Input* input = input_from_stdin();
     State* state = new_state(config, input);
 
+    // Load font
+    // Font LoadFontFromMemory(
+    //     const char *fileType, 
+    //     const unsigned char *fileData, 
+    //     int dataSize, 
+    //     int fontSize, 
+    //     int *codepoints, 
+    //     int codepointCount
+    // ); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
+    
+    
+    Font font = LoadFontFromMemory(
+        "png", 
+        (const unsigned char*) &font_mecha, 
+        sizeof(font_mecha), 
+        16, 
+        0, 
+        0
+    );
+
     setup(config);
-    run(state, config);    
+    run(state, config, font);    
 
     state_free(state);
     input_free(input);

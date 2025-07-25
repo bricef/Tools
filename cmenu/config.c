@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+
+typedef struct {
+    bool bottom;
+    bool center;
+    int monitor;
+    const char* prompt;
+    int x;
+    int y;
+    int width;
+    int height;
+    int font_size;
+    int padding;
+} Config;
+
+Config config_new(
+    int monitor,
+    bool bottom,
+    bool center,
+    const char* prompt,
+    int x,
+    int y,
+    int width,
+    int font_size,
+    int padding
+){
+    Config config;
+    config.monitor = monitor;
+    config.bottom = bottom;
+    config.center = center;
+    config.prompt = prompt;
+    config.x = x;
+    config.y = y;
+    config.height = font_size + padding * 2;
+    config.width = width;
+    config.font_size = font_size;
+    config.padding = padding;
+    return config;
+}
+
+void config_print(const Config* config){
+    printf("Config.bottom: %d\n", config->bottom);
+    printf("Config.monitor: %d\n", config->monitor);
+    printf("Config.prompt: \"%s\"\n", config->prompt);
+    printf("Config.x: %d\n", config->x);
+    printf("Config.y: %d\n", config->y);
+    printf("Config.width: %d\n", config->width);
+    printf("Config.height: %d\n", config->height);
+}
+
+
+int config_get_width(const Config* config){
+    return config->width ? config->width : GetMonitorWidth(config->monitor);
+}
+
+int config_get_height(const Config* config){
+    return config->height ? config->height : 50;
+}
+
+int config_get_x(const Config* config){
+    return config->x;
+}
+
+int config_get_y(const Config* config){
+    return config->y;
+}

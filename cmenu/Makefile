@@ -9,18 +9,43 @@ else
     RAYLIB_FLAGS = -lraylib
 endif
 
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    DETECTED_OS := Windows
+else
+    DETECTED_OS := $(shell uname -s)
+    ifeq ($(DETECTED_OS),Darwin)
+        DETECTED_OS := MacOS
+    endif
+    ifeq ($(DETECTED_OS),Linux)
+        DETECTED_OS := Linux
+    endif
+endif
+
+# OS specific flags
+ifeq ($(DETECTED_OS),Windows)
+    PLATFORM_FLAGS = -lopengl32 -lgdi32 -lwinmm
+else ifeq ($(DETECTED_OS),MacOS) 
+    PLATFORM_FLAGS = -framework OpenGL 
+else ifeq ($(DETECTED_OS),Linux)
+    PLATFORM_FLAGS = -lGL -lm -lpthread -ldl -lrt -lX11
+endif
+
+
 # Always include necessary system libraries
-CFLAGS = $(RAYLIB_FLAGS) -lGL -lm -lpthread -ldl -lrt -lX11
-CFLAGS += -I./lib/
-CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-but-set-variable
+CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
+CFLAGS += -I./lib/ -I./lib/args/src/
+CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-parameter -Wno-unused-but-set-variable
+
+DEPS = lib/args/src/args.c
 
 all: target/cmenu
 
 target/cmenu: main.c target
-	gcc -o target/cmenu main.c $(CFLAGS) $(LIBFLAGS)	
+	gcc -o target/cmenu main.c $(DEPS) $(CFLAGS) $(LIBFLAGS)	
 
 target/cmenu-debug: main.c target
-	gcc -g3 -o target/cmenu-debug main.c $(CFLAGS) $(LIBFLAGS)
+	gcc -g3 -o target/cmenu-debug main.c $(DEPS) $(CFLAGS) $(LIBFLAGS)
 
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit

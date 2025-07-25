@@ -69,3 +69,13 @@ $ make
 
 The output binaries will be in the `target/` directory.
 
+## TODO
+
+- [ ] Fix ugly font
+- [ ] Fix arrow navigation and item selection highlight
+- [ ] Create test suite
+- [ ] Write launcher script (as per `dmenu_run`)
+- [ ] set up companion shell menu script (use `bmenu` format?)
+- [ ] Add number shortcuts option
+- [ ] Exit on lose focus by default, with option to prevent
+- [ ] Build for windows (?)

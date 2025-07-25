@@ -1,35 +1,12 @@
 #include "raylib.h"
 #include <unistd.h>
-#include "config.c"
+
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 #include "args.h"
-
-void filter_by_prefix(
-    const char* prefix, 
-    const char** options, 
-    const int options_count, 
-    const char** filtered_options, 
-    int* filtered_options_count
-) {
-    if (prefix == NULL || prefix[0] == '\0') {
-        *filtered_options_count = options_count;
-        for (int i = 0; i < options_count; i++) {
-            filtered_options[i] = options[i];
-        }
-        return;
-    }
-
-    *filtered_options_count = 0;
-    for (int i = 0; i < options_count; i++) {
-        if (strncasecmp(options[i], prefix, strlen(prefix)) == 0) {
-            filtered_options[*filtered_options_count] = options[i];
-            (*filtered_options_count)++;
-        }
-    }
-}
+#include "cmenu.h"
 
 void error(const char* message){
     fprintf(stderr, "Error: %s\n", message);
@@ -72,7 +49,6 @@ const char* version = "0.0.1";
 
 Config parse_args(int argc, char** argv){
     
-
     // Set up parser
     ArgParser* parser = ap_new_parser();
     ap_set_helptext(parser, helptext);
@@ -106,11 +82,6 @@ Config parse_args(int argc, char** argv){
     return config;
 }
 
-typedef struct {
-    const char** options;
-    int input_count;
-} Input;
-
 Input parse_input(const Config* config){
     Input input;
     input.input_count = 6;
@@ -124,29 +95,6 @@ Input parse_input(const Config* config){
     return input;
 }
 
-typedef struct {
-    int active;
-    int scrollIndex;
-    const char** options;
-    int options_count;
-    int filtered_options_count;
-    const char** filtered_options;
-    int focus;
-    char text[255];
-} State;
-
-State new_state(const Config* config, const Input* input){
-    State state;
-    state.active = 0;
-    state.scrollIndex = 0;
-    state.focus = 0;
-    state.text[0] = '\0';
-    state.options_count = input->input_count;
-    state.options = input->options;
-    state.filtered_options_count = 0;
-    state.filtered_options = (const char**) malloc(input->input_count * sizeof(const char*));
-    return state;
-}
 
 void position_window(const Config* config){
     // Get monitor info
@@ -182,12 +130,14 @@ void position_window(const Config* config){
 void handle_input(State* state){
     if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_RIGHT)) {
         // printf("DOWN\n");
+        state_select_next(state);
         state->active++;
         if (state->active >= state->filtered_options_count) state->active = 0;
     }
 
     if(IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_LEFT)) {
         // printf("UP\n");
+        state_select_previous(state);
         state->active--;
         if (state->active < 0) state->active = state->filtered_options_count - 1;
     }
@@ -214,16 +164,9 @@ void run(State* state, const Config* config){
         position_window(config);
         handle_input(state);
         
-        filter_by_prefix(
-            state->text, 
-            state->options, 
-            state->options_count, 
-            state->filtered_options, 
-            &state->filtered_options_count
-        );
+        state_filter(state);
 
         // Draw
-        //----------------------------------------------------------------------------------
         BeginDrawing();
             ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
             int offset_x = 0;
@@ -270,15 +213,6 @@ void run(State* state, const Config* config){
 
                 offset_x += box_width;
             }
-
-            // GuiListViewEx(
-            //     (Rectangle){ offset_x, offset_y, 200, 200 }, 
-            //     state->filtered_options, 
-            //     state->filtered_options_count,  
-            //     &state->scrollIndex, 
-            //     &state->active, 
-            //     &state->focus
-            // );
 
         EndDrawing();
     }

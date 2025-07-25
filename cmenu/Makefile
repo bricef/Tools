@@ -37,15 +37,17 @@ CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
 CFLAGS += -I./lib/ -I./lib/args/src/
 CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-parameter -Wno-unused-but-set-variable
 
+FILES = main.c config.c state.c
+
 DEPS = lib/args/src/args.c
 
 all: target/cmenu
 
-target/cmenu: main.c target
-	gcc -o target/cmenu main.c $(DEPS) $(CFLAGS) $(LIBFLAGS)	
+target/cmenu: $(FILES) target
+	gcc -o target/cmenu $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)	
 
-target/cmenu-debug: main.c target
-	gcc -g3 -o target/cmenu-debug main.c $(DEPS) $(CFLAGS) $(LIBFLAGS)
+target/cmenu-debug: $(FILES) target
+	gcc -g3 -o target/cmenu-debug $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)
 
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit

@@ -1,19 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
-
-
-typedef struct {
-    bool bottom;
-    bool center;
-    int monitor;
-    const char* prompt;
-    int x;
-    int y;
-    int width;
-    int height;
-    int font_size;
-    int padding;
-} Config;
+#include "raylib.h"
+#include "cmenu.h"
 
 Config config_new(
     int monitor,

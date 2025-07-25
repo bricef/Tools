@@ -1,0 +1,3 @@
+[submodule "cmenu/lib/args"]
+	path = cmenu/lib/args
+	url = git@github.com:dmulholl/args.git

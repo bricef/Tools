@@ -41,13 +41,13 @@ Config config_new(
 }
 
 void config_print(const Config* config){
-    printf("Config.bottom: %d\n", config->bottom);
-    printf("Config.monitor: %d\n", config->monitor);
-    printf("Config.prompt: \"%s\"\n", config->prompt);
-    printf("Config.x: %d\n", config->x);
-    printf("Config.y: %d\n", config->y);
-    printf("Config.width: %d\n", config->width);
-    printf("Config.height: %d\n", config->height);
+    fprintf(stderr, "Config.bottom: %d\n", config->bottom);
+    fprintf(stderr, "Config.monitor: %d\n", config->monitor);
+    fprintf(stderr, "Config.prompt: \"%s\"\n", config->prompt);
+    fprintf(stderr, "Config.x: %d\n", config->x);
+    fprintf(stderr, "Config.y: %d\n", config->y);
+    fprintf(stderr, "Config.width: %d\n", config->width);
+    fprintf(stderr, "Config.height: %d\n", config->height);
 }
 
 

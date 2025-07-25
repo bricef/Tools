@@ -5,7 +5,6 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-#include "args.h"
 #include "cmenu.h"
 
 void error(const char* message){
@@ -13,86 +12,37 @@ void error(const char* message){
     exit(1);
 }
 
-const char* helptext = "Usage: cmenu [options]\n"
-"\n"
-"Options:\n"
-"\n"
-"    -b --bottom            Appears at the bottom of the screen. (default: false)\n"
-"    -c --center            Centers the window. (default: false)\n"
-"    -m --monitor MONITOR   Try to display on monitor number supplied. Monitor\n"
-"                           numbers are starting from 0. (default: 0)\n"
-"    -p --prompt PROMPT     Prompt to be displayed to the left of the input field.\n"
-"                           (default: None)\n"
-"    -x POSITION            X position of the window. (default: 0)\n"
-"    -y POSITION            Y position of the window. (default: 0)\n"
-"    -w --width WIDTH       Width of the window. (default: screen width)\n"
-"    --font-size FONT_SIZE  Font size of the prompt and input. (default: 16px)\n"
-"\n"
-"Behaviour:\n"
-"\n"
-"    The menu will be read from STDIN as newline separated strings.\n"
-"\n"
-"    If the user input is a match for an option and the user has not selected an\n" 
-"    option, the first matching option is printed to stdout and the program \n"
-"    exits with code 0.\n"
-"\n"
-"    If the user input is not a match for an option, the user input is printed \n"
-"    to stdout and the program exits with code 2.\n"
-"\n"
-"    If the user input is empty, nothing is printed and the program exits with \n"
-"    code 0.\n"
-"\n"
-"    If the user presses ESC, the program exits with code 0.\n"
-;
 
-const char* version = "0.0.1";
 
-Config parse_args(int argc, char** argv){
-    
-    // Set up parser
-    ArgParser* parser = ap_new_parser();
-    ap_set_helptext(parser, helptext);
-    ap_set_version(parser, version);
-    ap_add_flag(parser, "b bottom");
-    ap_add_flag(parser, "c center");
-    ap_add_int_opt(parser, "m monitor", 0);
-    ap_add_str_opt(parser, "p prompt", "");
-    ap_add_int_opt(parser, "x", 0);
-    ap_add_int_opt(parser, "y", 0);
-    ap_add_int_opt(parser, "w width", 0);
-    ap_add_int_opt(parser, "font-size", 16);
+// Input parse_input(const Config* config){
+//     Input input;
+//     input.input_count = 6;
+//     input.options = (const char**) malloc(input.input_count * sizeof(const char*));
+//     input.options[0] = "Alpha";
+//     input.options[1] = "Bravo";
+//     input.options[2] = "Charlie";    
+//     input.options[3] = "Aardvark";
+//     input.options[4] = "Bottle";
+//     input.options[5] = "Calendar";
+//     return input;
+// }
 
-    // Parse args
-    ap_parse(parser, argc, argv);
-
-    // Set config
-    Config config = config_new(
-        ap_get_int_value(parser, "monitor"),
-        ap_found(parser, "b"),
-        ap_found(parser, "c"),
-        ap_get_str_value(parser, "p"),
-        ap_get_int_value(parser, "x"),
-        ap_get_int_value(parser, "y"),
-        ap_get_int_value(parser, "w"),
-        ap_get_int_value(parser, "font-size"),
-        8 // Padding
-    );
-
-    ap_free(parser);
-    return config;
+Input* input_from_stdin(void){
+    Input* input = (Input*) malloc(sizeof(Input));
+    input->input_count = 6;
+    input->options = (const char**) malloc(input->input_count * sizeof(const char*));
+    input->options[0] = "Alpha";
+    input->options[1] = "Bravo";
+    input->options[2] = "Charlie";
+    input->options[3] = "Aardvark";
+    input->options[4] = "Bottle";
+    input->options[5] = "Calendar";
+    return input;
 }
 
-Input parse_input(const Config* config){
-    Input input;
-    input.input_count = 6;
-    input.options = (const char**) malloc(input.input_count * sizeof(const char*));
-    input.options[0] = "Alpha";
-    input.options[1] = "Bravo";
-    input.options[2] = "Charlie";    
-    input.options[3] = "Aardvark";
-    input.options[4] = "Bottle";
-    input.options[5] = "Calendar";
-    return input;
+void input_free(Input* input){
+    free(input->options);
+    free(input);
 }
 
 
@@ -233,17 +183,21 @@ void setup(const Config* config){
 
 int main(int argc, char** argv)
 {
-    
-    const Config config = parse_args(argc, argv);
+    Config* config = config_from_args(argc, argv);
+    // const Config config = parse_args(argc, argv);
     //config_print(&config);
 
-    const Input input = parse_input(&config);
+    Input* input = input_from_stdin();
 
-    setup(&config);
+    setup(config);
 
-    State state = new_state(&config, &input);
+    State* state = new_state(config, input);
 
-    run(&state, &config);    
+    run(state, config);    
+
+    state_free(state);
+    input_free(input);
+    config_free(config);
 
     CloseWindow();
     return 0;

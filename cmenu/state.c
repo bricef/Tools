@@ -2,17 +2,22 @@
 #include <string.h>
 #include "cmenu.h"
 
-State new_state(const Config* config, const Input* input){
-    State state;
-    state.active = 0;
-    state.scrollIndex = 0;
-    state.focus = 0;
-    state.text[0] = '\0';
-    state.options_count = input->input_count;
-    state.options = input->options;
-    state.filtered_options_count = 0;
-    state.filtered_options = (const char**) malloc(input->input_count * sizeof(const char*));
+State* new_state(const Config* config, const Input* input){
+    State* state = (State*) malloc(sizeof(State));
+    state->active = 0;
+    state->scrollIndex = 0;
+    state->focus = 0;
+    state->text[0] = '\0';
+    state->options_count = input->input_count;
+    state->options = input->options;
+    state->filtered_options_count = 0;
+    state->filtered_options = (const char**) malloc(input->input_count * sizeof(const char*));
     return state;
+}
+
+void state_free(State* state){
+    free(state->filtered_options);
+    free(state);
 }
 
 void state_select_next(State* state){

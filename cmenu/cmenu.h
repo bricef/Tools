@@ -16,22 +16,16 @@ typedef struct {
     int padding;
 } Config;
 
-Config config_new(
-    int monitor,
-    bool bottom,
-    bool center,
-    const char* prompt,
-    int x,
-    int y,
-    int width,
-    int font_size,
-    int padding
-);
+Config* config_from_args(int argc, char** argv);
+void config_free(Config* config);
 
 typedef struct {
     const char** options;
     int input_count;
 } Input;
+
+Input* input_from_stdin(void);
+void input_free(Input* input);
 
 typedef struct {
     int active;
@@ -45,7 +39,8 @@ typedef struct {
 } State;
 
 // Function declarations
-State new_state(const Config* config, const Input* input);
+State* new_state(const Config* config, const Input* input);
+void state_free(State* state);
 void state_select_next(State* state);
 void state_select_previous(State* state);
 void state_filter(State* state);

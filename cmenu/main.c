@@ -6,7 +6,7 @@
 #include "raygui.h"
 
 #include "cmenu.h"
-#include "build/font_mecha.h"
+#include "build/font_roboto.h"
 
 Input* input_from_stdin(void){
 
@@ -141,13 +141,13 @@ void run(State* state, const Config* config, Font font){
             int offset_y = 0;
             
             if(config->prompt != NULL && config->prompt[0] != '\0'){
-                int prompt_width = MeasureText(config->prompt, config->font_size) + config->padding * 2;
+                int prompt_width = MeasureTextEx(font, config->prompt, config->font_size, 0.0).x + config->padding * 2;
                 DrawTextEx(
                     font,
                     config->prompt,
                     (Vector2){ offset_x + config->padding, offset_y + config->padding },
                     config->font_size,
-                    0,
+                    1,
                     BLACK // TODO: Get color from config
                 );
                 offset_x += prompt_width;
@@ -172,11 +172,12 @@ void run(State* state, const Config* config, Font font){
                     DrawRectangle(offset_x, offset_y, box_width, config->height, RED);
                 }
 
-                DrawText(
+                DrawTextEx(
+                    font,
                     state->filtered_options[i],
-                    offset_x + config->padding,
-                    offset_y + config->padding,
+                    (Vector2){ offset_x + config->padding, offset_y + config->padding },
                     config->font_size,
+                    0,
                     BLACK // TODO: Get color from config
                 );
 
@@ -205,28 +206,24 @@ int main(int argc, char** argv)
     Config* config = config_from_args(argc, argv);
     Input* input = input_from_stdin();
     State* state = new_state(config, input);
+    
+    setup(config);
 
-    // Load font
-    // Font LoadFontFromMemory(
-    //     const char *fileType, 
-    //     const unsigned char *fileData, 
-    //     int dataSize, 
-    //     int fontSize, 
-    //     int *codepoints, 
-    //     int codepointCount
-    // ); // Load font from memory buffer, fileType refers to extension: i.e. '.ttf'
-    
-    
+    // must be called after window is initialised
     Font font = LoadFontFromMemory(
-        "png", 
-        (const unsigned char*) &font_mecha, 
-        sizeof(font_mecha), 
+        "ttf", 
+        (const unsigned char*) &font_roboto, 
+        sizeof(font_roboto), 
         16, 
         0, 
         0
     );
+    // Font font = LoadFontEx("fonts/roboto.ttf", 16, 0, 0);
 
-    setup(config);
+    if(!IsFontValid(font)){
+        error("Failed to load font\n");
+    }
+
     run(state, config, font);    
 
     state_free(state);

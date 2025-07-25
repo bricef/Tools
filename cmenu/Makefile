@@ -54,9 +54,9 @@ target/cmenu-debug: $(FILES) target fonts
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit
 
-fonts: build/font_mecha.h
+fonts: build/font_roboto.h
 
-build/font_%.h: fonts/%.png build 
+build/font_%.h: fonts/%.ttf build 
 	xxd -i < ${<} > $@.xxd
 	NAME=font_$(subst fonts/,,$(basename ${<}));\
 	echo "const unsigned char $$NAME []= {" > build/prefix; \

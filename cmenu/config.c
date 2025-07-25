@@ -23,7 +23,7 @@ const char* helptext = "Usage: cmenu [options]\n"
 "\n"
 "Behaviour:\n"
 "\n"
-"    The menu will be read from STDIN as newline separated strings.\n"
+"    The menu will be read from STDIN as newline separated strings. Order is preserved.\n"
 "\n"
 "    If the user input is a match for an option and the user has not selected an\n" 
 "    option, the first matching option is printed to stdout and the program \n"
@@ -53,7 +53,7 @@ Config* config_new(
 ){
     Config* config = (Config*) malloc(sizeof(Config));
     panic_if_null(config);
-    
+
     config->monitor = monitor;
     config->bottom = bottom;
     config->center = center;

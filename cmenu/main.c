@@ -7,24 +7,57 @@
 #include "cmenu.h"
 
 Input* input_from_stdin(void){
+
     // TODO: Read from stdin
     Input* input = (Input*) malloc(sizeof(Input)); 
     panic_if_null(input);
     
-    input->input_count = 6;
-    input->options = (const char**) malloc(input->input_count * sizeof(const char*));
-    panic_if_null(input->options);
+    // Read lines from stdin into a dynamic array
+    char** lines = NULL;
+    size_t line_count = 0;
+    size_t capacity = 16;
     
-    input->options[0] = "Alpha";
-    input->options[1] = "Bravo";
-    input->options[2] = "Charlie";
-    input->options[3] = "Aardvark";
-    input->options[4] = "Bottle";
-    input->options[5] = "Calendar";
+    lines = (char**) malloc(capacity * sizeof(char*));
+    panic_if_null(lines);
+
+
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    while ((read = getline(&line, &len, stdin)) != -1) {
+        // Remove trailing newline if present
+        if (read > 0 && line[read-1] == '\n') {
+            line[read-1] = '\0';
+        }
+
+        // Resize array if needed
+        if (line_count == capacity) {
+            capacity *= 2;
+            char** new_lines = (char**) realloc(lines, capacity * sizeof(char*));
+            panic_if_null(new_lines);
+            lines = new_lines;
+        }
+
+        // Copy line into array
+        lines[line_count] = strdup(line);
+        panic_if_null(lines[line_count]);
+        line_count++;
+    }
+
+    free(line);
+
+    // Set up input struct with read lines
+    input->input_count = line_count;
+    input->options = (const char**) lines;
+    
     return input;
 }
 
 void input_free(Input* input){
+    for (size_t i = 0; i < input->input_count; i++) {
+        free(input->options[i]);
+    }
     free(input->options);
     free(input);
 }

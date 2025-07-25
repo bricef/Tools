@@ -12,22 +12,8 @@ void error(const char* message){
     exit(1);
 }
 
-
-
-// Input parse_input(const Config* config){
-//     Input input;
-//     input.input_count = 6;
-//     input.options = (const char**) malloc(input.input_count * sizeof(const char*));
-//     input.options[0] = "Alpha";
-//     input.options[1] = "Bravo";
-//     input.options[2] = "Charlie";    
-//     input.options[3] = "Aardvark";
-//     input.options[4] = "Bottle";
-//     input.options[5] = "Calendar";
-//     return input;
-// }
-
 Input* input_from_stdin(void){
+    // TODO: Read from stdin
     Input* input = (Input*) malloc(sizeof(Input));
     input->input_count = 6;
     input->options = (const char**) malloc(input->input_count * sizeof(const char*));
@@ -184,15 +170,10 @@ void setup(const Config* config){
 int main(int argc, char** argv)
 {
     Config* config = config_from_args(argc, argv);
-    // const Config config = parse_args(argc, argv);
-    //config_print(&config);
-
     Input* input = input_from_stdin();
-
-    setup(config);
-
     State* state = new_state(config, input);
 
+    setup(config);
     run(state, config);    
 
     state_free(state);

@@ -6,7 +6,7 @@ RAYLIB_PKG_CONFIG := $(shell pkg-config --exists raylib && echo "yes" || echo "n
 ifeq ($(RAYLIB_PKG_CONFIG),yes)
     RAYLIB_FLAGS = $(shell pkg-config --libs --cflags raylib)
 else
-    RAYLIB_FLAGS = -lraylib
+    # RAYLIB_FLAGS = -lraylib
 endif
 
 # Detect OS
@@ -35,21 +35,25 @@ endif
 # Always include necessary system libraries
 CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
 CFLAGS += -I./lib/ -I./lib/args/src/ -I./build/
-CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
+CFLAGS += -Wall -Wextra -Werror --pedantic 
+CFLAGS += -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable -Wno-unused-result
 
 
 FILES = main.c config.c state.c utils.c
 
 DEPS = lib/args/src/args.c
-
+DEPFLAGS = -Wall -Wextra --pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
 
 all: target/cmenu
 
-target/cmenu: $(FILES) target fonts
-	gcc -o $@ $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)	
+build/args.o: lib/args/src/args.c
+	gcc -c -o $@ $(DEPFLAGS) $< 
 
-target/cmenu-debug: $(FILES) target fonts
-	gcc -g3 -o $@ $(FILES) $(DEPS) $(CFLAGS) $(LIBFLAGS)
+target/cmenu: $(FILES) target fonts build/args.o lib/libraylib.a
+	gcc -o $@  $(CFLAGS) $(LIBFLAGS) build/args.o lib/libraylib.a $(FILES)
+
+target/cmenu-debug: $(FILES) target fonts build/args.o lib/libraylib.a
+	gcc -g3 -o $@ $(DEPS) $(CFLAGS) $(LIBFLAGS) build/args.o lib/libraylib.a $(FILES) 
 
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit

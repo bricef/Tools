@@ -71,7 +71,7 @@ The output binaries will be in the `target/` directory.
 
 ## TODO
 
-- [ ] Fix ugly font
+- [x] Fix ugly font
 - [ ] Allow custom font
 - [ ] Fix styling with input box
 - [ ] Enable custom colours

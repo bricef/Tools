@@ -211,7 +211,7 @@ int main(int argc, char** argv)
 
     // must be called after window is initialised
     Font font = LoadFontFromMemory(
-        "ttf", 
+        ".ttf", 
         (const unsigned char*) &font_roboto, 
         sizeof(font_roboto), 
         16, 
@@ -219,6 +219,7 @@ int main(int argc, char** argv)
         0
     );
     // Font font = LoadFontEx("fonts/roboto.ttf", 16, 0, 0);
+    //  Font font = LoadFont("fonts/mecha.png");
 
     if(!IsFontValid(font)){
         error("Failed to load font\n");

@@ -1,5 +1,6 @@
 
 #include <stdbool.h>
+#include "raylib.h"
 
 #ifndef CMENU_H
 #define CMENU_H
@@ -17,6 +18,14 @@ typedef struct {
     int height;
     int font_size;
     int padding;
+    Color active_background;
+    Color active_foreground;
+    Color prompt_background;
+    Color prompt_foreground;
+    Color input_background;
+    Color input_foreground;
+    Color normal_background;
+    Color normal_foreground;
 } Config;
 
 Config* config_from_args(int argc, char** argv);

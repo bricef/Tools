@@ -64,6 +64,15 @@ Config* config_new(
     config->width = width;
     config->font_size = font_size;
     config->padding = padding;
+
+    config->active_background = RED;
+    config->active_foreground = WHITE;
+    config->prompt_background = GREEN;
+    config->prompt_foreground = WHITE;
+    config->input_background = GRAY;
+    config->input_foreground = WHITE;
+    config->normal_background = BLACK;
+    config->normal_foreground = WHITE;
     return config;
 }
 

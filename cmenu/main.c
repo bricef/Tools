@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <sys/types.h>
 #include "raylib.h"
 
 
@@ -136,7 +137,7 @@ void run(State* state, const Config* config, Font font){
 
         // Draw
         BeginDrawing();
-            ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
+            ClearBackground(config->normal_background);
             int offset_x = 0;
             int offset_y = 0;
             
@@ -148,9 +149,10 @@ void run(State* state, const Config* config, Font font){
                     (Vector2){ offset_x + config->padding, offset_y + config->padding },
                     config->font_size,
                     1,
-                    BLACK // TODO: Get color from config
+                    config->prompt_foreground
                 );
                 offset_x += prompt_width;
+                offset_x += config->padding;
             }
 
             int input_width = 200;
@@ -159,7 +161,7 @@ void run(State* state, const Config* config, Font font){
             GuiTextBox(
                 (Rectangle){ offset_x, offset_y, input_width, config->height }, 
                 state->text, 
-                30, 
+                config->font_size, 
                 true
             );
             offset_x += input_width;
@@ -169,17 +171,27 @@ void run(State* state, const Config* config, Font font){
                 int box_width = text_width + config->padding * 2;
 
                 if (i == state->active){
-                    DrawRectangle(offset_x, offset_y, box_width, config->height, RED);
+                    DrawRectangle(offset_x, offset_y, box_width, config->height, config->active_background);
+                    DrawTextEx(
+                        font,
+                        state->filtered_options[i],
+                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
+                        config->font_size,
+                        0,
+                        config->active_foreground
+                    );
+                }else{
+                    DrawTextEx(
+                        font,
+                        state->filtered_options[i],
+                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
+                        config->font_size,
+                        0,
+                        config->normal_foreground
+                    );
                 }
 
-                DrawTextEx(
-                    font,
-                    state->filtered_options[i],
-                    (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                    config->font_size,
-                    0,
-                    BLACK // TODO: Get color from config
-                );
+                
 
                 offset_x += box_width;
             }
@@ -193,12 +205,34 @@ void setup(const Config* config){
     // Ensure window gets rendered without decorations
     SetTraceLogLevel(LOG_ERROR); 
     SetWindowState(FLAG_WINDOW_UNDECORATED|FLAG_WINDOW_HIGHDPI);
-
+    
     InitWindow(config->width, config->height, "cmenu");
     SetWindowPosition(config->x, config->y);
     SetWindowMonitor(config->monitor);
     
     SetTargetFPS(60);
+}
+
+
+void set_gui_style(const Config* config, Font font){
+    GuiSetFont(font);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, config->font_size);
+
+    int input_fg = ColorToInt(config->input_foreground);
+    int input_bg = ColorToInt(config->input_background);
+    int input_border = 0xFFFFFFFF;
+
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, input_fg);
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, input_fg);
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_PRESSED, input_fg);
+
+    GuiSetStyle(TEXTBOX, BASE_COLOR_PRESSED, input_bg);
+    GuiSetStyle(TEXTBOX, BASE_COLOR_FOCUSED, input_bg);
+    GuiSetStyle(TEXTBOX, BASE_COLOR_NORMAL, input_bg);
+
+    GuiSetStyle(TEXTBOX, BORDER_COLOR_PRESSED, input_border);
+    GuiSetStyle(TEXTBOX, BORDER_COLOR_FOCUSED, input_border);
+    GuiSetStyle(TEXTBOX, BORDER_COLOR_NORMAL, input_border);
 }
 
 int main(int argc, char** argv)
@@ -208,6 +242,7 @@ int main(int argc, char** argv)
     State* state = new_state(config, input);
     
     setup(config);
+    
 
     // must be called after window is initialised
     Font font = LoadFontFromMemory(
@@ -218,6 +253,23 @@ int main(int argc, char** argv)
         0, 
         0
     );
+    set_gui_style(config, font);
+
+    
+    
+    /*
+    
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(config->input_foreground));
+    GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(config->input_foreground));
+*/
+
+    // GuiSetStyle(TEXTBOX, BASE_COLOR_NORMAL, ColorToInt(config->prompt_background));
+    
+    // GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(config->input_foreground));
+    // GuiSetStyle(TEXTBOX, BASE_COLOR_FOCUSED, ColorToInt(config->prompt_background));
+    // GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(config->prompt_text));
+    
+    
     // Font font = LoadFontEx("fonts/roboto.ttf", 16, 0, 0);
     //  Font font = LoadFont("fonts/mecha.png");
 

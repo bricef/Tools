@@ -54,7 +54,7 @@ target/cmenu-debug: $(FILES) target fonts
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit
 
-fonts: build/font_roboto.h
+fonts: build/font_roboto.h build/font_roboto_mono.h
 
 build/font_%.h: fonts/%.ttf build 
 	xxd -i < ${<} > $@.xxd

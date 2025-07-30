@@ -72,6 +72,9 @@ The output binaries will be in the `target/` directory.
 ## TODO
 
 - [ ] Fix ugly font
+- [ ] Allow custom font
+- [ ] Fix styling with input box
+- [ ] Enable custom colours
 - [ ] Fix arrow navigation and item selection highlight
 - [ ] Create test suite
 - [ ] Write launcher script (as per `dmenu_run`)

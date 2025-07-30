@@ -6,7 +6,7 @@
 #include "raygui.h"
 
 #include "cmenu.h"
-#include "build/font_roboto.h"
+#include "build/font_roboto_mono.h"
 
 Input* input_from_stdin(void){
 
@@ -212,8 +212,8 @@ int main(int argc, char** argv)
     // must be called after window is initialised
     Font font = LoadFontFromMemory(
         ".ttf", 
-        (const unsigned char*) &font_roboto, 
-        sizeof(font_roboto), 
+        (const unsigned char*) &font_roboto_mono, 
+        sizeof(font_roboto_mono), 
         16, 
         0, 
         0

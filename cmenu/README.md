@@ -72,8 +72,9 @@ The output binaries will be in the `target/` directory.
 ## TODO
 
 - [x] Fix ugly font
+- [ ] Support mouse click
 - [ ] Allow custom font
-- [ ] Fix styling with input box
+- [x] Fix styling with input box
 - [ ] Enable custom colours
 - [ ] Fix arrow navigation and item selection highlight
 - [ ] Create test suite
@@ -82,3 +83,16 @@ The output binaries will be in the `target/` directory.
 - [ ] Add number shortcuts option
 - [ ] Exit on lose focus by default, with option to prevent
 - [ ] Build for windows (?)
+- [ ] enable vertical mode
+
+## Feature inspiration 
+
+- https://github.com/muff1nman/dmenu2
+- https://github.com/davatorium/rofi
+- https://github.com/emgram769/lighthouse
+- https://github.com/MarkHedleyJones/dmenu-extended
+- https://github.com/TrilbyWhite/interrobang
+- https://github.com/sbstnc/dmenu-ee
+- https://ulauncher.io/
+- https://github.com/Cloudef/bemenu
+- https://github.com/albertlauncher

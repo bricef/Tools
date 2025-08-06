@@ -53,10 +53,28 @@ target/cmenu: $(FILES) target fonts build/args.o
 	gcc -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)	
 
 target/cmenu-debug: $(FILES) target fonts build/args.o
-	gcc -g3 -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)
+	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)
+
+target/cmenu-asan: $(FILES) target fonts build/args.o
+	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)
 
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit
+
+valgrind: target/cmenu-debug
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt
+
+valgrind-quick: target/cmenu-debug
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt
+
+valgrind-errors: target/cmenu-debug
+	valgrind --tool=memcheck --track-origins=yes --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt
+
+leaks: target/cmenu-debug tests/basic.txt
+	MallocStackLogging=1 leaks --atExit -- ./target/cmenu-debug  <tests/basic.txt 
+
+asan-test: target/cmenu-asan tests/basic.txt
+	./target/cmenu-asan <tests/basic.txt
 
 fonts: build/font_roboto.h build/font_roboto_mono.h
 

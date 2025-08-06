@@ -1,0 +1,48 @@
+# Valgrind suppression file for cmenu
+# This file contains suppressions for false positives from system libraries
+
+# Suppress OpenGL/X11 related leaks (common on Linux)
+{
+   OpenGL/X11 leaks
+   Memcheck:Leak
+   ...
+   obj:*/libGL.so.*
+}
+
+{
+   OpenGL/X11 leaks
+   Memcheck:Leak
+   ...
+   obj:*/libX11.so.*
+}
+
+# Suppress raylib related leaks (if any)
+{
+   raylib leaks
+   Memcheck:Leak
+   ...
+   obj:*/libraylib.so.*
+}
+
+# Suppress font loading related leaks
+{
+   font loading leaks
+   Memcheck:Leak
+   ...
+   obj:*/libfreetype.so.*
+}
+
+# Suppress common system library leaks
+{
+   system library leaks
+   Memcheck:Leak
+   ...
+   obj:*/libc.so.*
+}
+
+{
+   system library leaks
+   Memcheck:Leak
+   ...
+   obj:*/libm.so.*
+} 

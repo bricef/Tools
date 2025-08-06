@@ -69,6 +69,10 @@ $ make
 
 The output binaries will be in the `target/` directory.
 
+### Testing
+
+There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
+
 ## TODO
 
 - [ ] Support mouse click
@@ -80,10 +84,11 @@ The output binaries will be in the `target/` directory.
 - [ ] set up companion shell menu script (use `bmenu` format?)
 - [ ] Add number shortcuts option
 - [ ] Build for windows (?)
-- [ ] Set up valgrind check scripts
+ scripts
 
 ## Done 
 
+- [x] Set up valgrind check
 - [x] Exit on lose focus by default, with option to prevent
 - [x] enable vertical mode
 - [x] Enable center of screen mode with vertical

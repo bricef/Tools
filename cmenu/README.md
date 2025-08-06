@@ -79,11 +79,12 @@ The output binaries will be in the `target/` directory.
 - [ ] Write launcher script (as per `dmenu_run`)
 - [ ] set up companion shell menu script (use `bmenu` format?)
 - [ ] Add number shortcuts option
-- [ ] Exit on lose focus by default, with option to prevent
 - [ ] Build for windows (?)
+- [ ] Set up valgrind check scripts
 
 ## Done 
 
+- [x] Exit on lose focus by default, with option to prevent
 - [x] enable vertical mode
 - [x] Enable center of screen mode with vertical
 - [x] Fix ugly font

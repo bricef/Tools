@@ -285,6 +285,10 @@ void draw_vertical(State* state, const Config* config, Font font){
 
 void run(State* state, const Config* config, Font font){
     while (!WindowShouldClose()){
+        if (!IsWindowFocused() && !config->persist){
+            break;
+        }
+
         position_window(config);
         handle_input(state);
         state_filter(state);

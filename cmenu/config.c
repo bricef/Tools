@@ -22,6 +22,7 @@ const char* helptext = "Usage: cmenu [options]\n"
 "    --font-size FONT_SIZE  Font size of the prompt and input. (default: 16px)\n"
 "    -v --vertical          Vertical menu. (default: false)\n" // TODO: allow setting of vlines
 "    --border-width WIDTH   Border width of the menu. (default: 0)\n"
+"    --persist              Don't exit when the window loses focus. (default: false)\n"
 "\n"
 "Behaviour:\n"
 "\n"
@@ -54,7 +55,8 @@ Config* config_new(
     int padding,
     bool vertical,
     int vlines,
-    int border_width
+    int border_width,
+    bool persist
 ){  
     Config* config = (Config*) malloc(sizeof(Config));
     panic_if_null(config);
@@ -72,6 +74,7 @@ Config* config_new(
     config->vertical = vertical;
     config->vlines = 10;
     config->border_width = border_width;
+    config->persist = persist;
 
     config->active_background = RED;
     config->active_foreground = WHITE;
@@ -104,6 +107,8 @@ Config* config_from_args(int argc, char** argv){
     ap_add_int_opt(parser, "font-size", 16);
     ap_add_flag(parser, "v vertical");
     ap_add_int_opt(parser, "border-width", 0);
+    ap_add_flag(parser, "persist");
+
     // Parse args
     ap_parse(parser, argc, argv);
 
@@ -120,7 +125,8 @@ Config* config_from_args(int argc, char** argv){
         8, // Padding
         ap_found(parser, "v"),
         10, // Number of vertical lines to draw
-        ap_get_int_value(parser, "border-width")
+        ap_get_int_value(parser, "border-width"),
+        ap_found(parser, "persist")
     );
 
     ap_free(parser);

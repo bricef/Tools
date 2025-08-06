@@ -21,6 +21,7 @@ typedef struct {
     bool vertical;
     int vlines; // Number of vertical lines to draw
     int border_width;
+    bool persist;
     Color active_background;
     Color active_foreground;
     Color prompt_background;

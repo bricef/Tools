@@ -39,6 +39,9 @@ CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-variable -Wno-unused-para
 
 DEPFLAGS = 
 
+
+COMPRESS_CMD = zlib-flate -compress
+
 FILES = main.c config.c state.c utils.c
 
 DEPS = lib/args/src/args.c
@@ -76,11 +79,19 @@ leaks: target/cmenu-debug tests/basic.txt
 asan-test: target/cmenu-asan tests/basic.txt
 	./target/cmenu-asan <tests/basic.txt
 
-fonts: build/font_roboto.h build/font_roboto_mono.h
+fonts: build/font_roboto.h build/font_roboto_mono.h build/compressed_font_roboto.h build/compressed_font_roboto_mono.h
 
 build/font_%.h: fonts/%.ttf build 
-	xxd -i < ${<} > $@.xxd
+	cat ${<} | xxd -i > $@.xxd
 	NAME=font_$(subst fonts/,,$(basename ${<}));\
+	echo "const unsigned char $$NAME []= {" > build/prefix; \
+	echo "};" > build/suffix
+	cat build/prefix ${@}.xxd build/suffix > $@
+	rm build/prefix build/suffix build/*.xxd
+
+build/compressed_font_%.h: fonts/%.ttf build 
+	cat ${<} | ${COMPRESS_CMD} | xxd -i > $@.xxd
+	NAME=compressed_font_$(subst fonts/,,$(basename ${<}));\
 	echo "const unsigned char $$NAME []= {" > build/prefix; \
 	echo "};" > build/suffix
 	cat build/prefix ${@}.xxd build/suffix > $@

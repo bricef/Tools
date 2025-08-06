@@ -8,6 +8,7 @@
 
 #include "cmenu.h"
 #include "build/font_roboto_mono.h"
+#include "build/compressed_font_roboto_mono.h"
 
 Input* input_from_stdin(void){
 
@@ -345,11 +346,28 @@ int main(int argc, char** argv)
     setup(config);
     
 
+
+    // Decompress font data
+    // int font_data_size = 0;
+    // const unsigned char* font_data = DecompressData(
+    //     (const unsigned char*) &compressed_font_roboto_mono, 
+    //     sizeof(compressed_font_roboto_mono), 
+    //     &font_data_size
+    // );
+
+    // if (font_data == NULL){
+    //     error("Failed to decompress font\n");
+    // }
+
+
+    const unsigned char* font_data = (const unsigned char*) &font_roboto_mono;
+    int font_data_size = sizeof(font_roboto_mono);
+
     // must be called after window is initialised
     Font font = LoadFontFromMemory(
         ".ttf", 
-        (const unsigned char*) &font_roboto_mono, 
-        sizeof(font_roboto_mono), 
+        font_data, 
+        font_data_size, 
         16, 
         0, 
         0
@@ -361,6 +379,8 @@ int main(int argc, char** argv)
     }
 
     run(state, config, font);    
+    
+    // MemFree((void*) font_data);
 
     state_free(state);
     input_free(input);

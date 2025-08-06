@@ -84,7 +84,7 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] set up companion shell menu script (use `bmenu` format?)
 - [ ] Add number shortcuts option
 - [ ] Build for windows (?)
- scripts
+- [ ] Compress raw fonts and assets (using LZ4? Zstd?)
 
 ## Done 
 

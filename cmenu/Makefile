@@ -32,17 +32,22 @@ else ifeq ($(DETECTED_OS),Linux)
 endif
 
 
+TTF_FILES = $(wildcard fonts/*.ttf)
+FONT_FILES = $(patsubst fonts/%.ttf,build/font_%.h,$(TTF_FILES))
+COMPRESSED_FONT_FILES = $(patsubst fonts/%.ttf,build/compressed_font_%.h,$(TTF_FILES))
+
+
 # Always include necessary system libraries
 CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
-CFLAGS += -I./lib/ -I./lib/args/src/ -I./build/
+CFLAGS += -I./lib/ -I./lib/args/src/ -I./build/ -I./lib/lz4/lib/
 CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
 
 DEPFLAGS = 
 
 
-COMPRESS_CMD = zlib-flate -compress
+COMPRESS_CMD = lz4 -1
 
-FILES = main.c config.c state.c utils.c
+FILES = main.c config.c state.c utils.c press.c
 
 DEPS = lib/args/src/args.c
 
@@ -52,14 +57,17 @@ all: target/cmenu
 build/args.o: lib/args/src/args.c
 	gcc -c -o $@ $(DEPFLAGS) $<
 
-target/cmenu: $(FILES) target fonts build/args.o
-	gcc -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)	
+lib/lz4/lib/liblz4.a:
+	make -C lib/lz4	
 
-target/cmenu-debug: $(FILES) target fonts build/args.o
-	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)
+target/cmenu: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
+	gcc -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)	
 
-target/cmenu-asan: $(FILES) target fonts build/args.o
-	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) build/args.o $(CFLAGS) $(LIBFLAGS)
+target/cmenu-debug: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
+	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) build/args.o lib/lz4/liblz4.a $(CFLAGS) $(LIBFLAGS)
+
+target/cmenu-asan: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
+	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)
 
 debug: target/cmenu-debug
 	lldb -f target/cmenu-debug -o run -o exit
@@ -79,7 +87,7 @@ leaks: target/cmenu-debug tests/basic.txt
 asan-test: target/cmenu-asan tests/basic.txt
 	./target/cmenu-asan <tests/basic.txt
 
-fonts: build/font_roboto.h build/font_roboto_mono.h build/compressed_font_roboto.h build/compressed_font_roboto_mono.h
+fonts: $(FONT_FILES) $(COMPRESSED_FONT_FILES)
 
 build/font_%.h: fonts/%.ttf build 
 	cat ${<} | xxd -i > $@.xxd

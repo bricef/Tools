@@ -7,8 +7,15 @@
 #include "raygui.h"
 
 #include "cmenu.h"
-#include "build/font_roboto_mono.h"
+#include "press.h"
+
+// #include "build/font_roboto_mono.h"
 #include "build/compressed_font_roboto_mono.h"
+// #include "build/font_roboto.h"
+// #include "build/compressed_font_roboto.h"
+// #include "build/font_pacifico.h"
+// #include "build/compressed_font_pacifico.h"
+
 
 Input* input_from_stdin(void){
 
@@ -337,6 +344,47 @@ void set_gui_style(const Config* config, Font font){
     GuiSetStyle(TEXTBOX, BORDER_COLOR_NORMAL, input_border);
 }
 
+
+Font load_compressed_font(const unsigned char* compressed_font, int compressed_font_size){
+    // Decompress font data
+    int ratio = 10;
+
+    int font_data_size_max = compressed_font_size * ratio;
+    char* font_data = malloc(font_data_size_max);
+
+    if (font_data == NULL){
+        error("Failed to allocate memory for font data\n");
+        exit(1);
+    }
+
+    int font_data_size = press_decompress_data (
+        (const unsigned char*) compressed_font,  
+        compressed_font_size, 
+        font_data, 
+        font_data_size_max
+    );
+    if (press_is_error(font_data_size)){
+        fprintf(stderr, "Failed to decompress font (ERROR: %s)\n", press_get_error_name(font_data_size));
+        exit(1);
+    }
+
+    // must be called after window is initialised
+    Font font = LoadFontFromMemory(
+        ".ttf", 
+        (const unsigned char*) font_data, 
+        font_data_size, 
+        16, 
+        0, 
+        0
+    );
+
+    free(font_data);
+
+    return font;
+}
+
+
+
 int main(int argc, char** argv)
 {
     Config* config = config_from_args(argc, argv);
@@ -345,33 +393,9 @@ int main(int argc, char** argv)
     
     setup(config);
     
-
-
-    // Decompress font data
-    // int font_data_size = 0;
-    // const unsigned char* font_data = DecompressData(
-    //     (const unsigned char*) &compressed_font_roboto_mono, 
-    //     sizeof(compressed_font_roboto_mono), 
-    //     &font_data_size
-    // );
-
-    // if (font_data == NULL){
-    //     error("Failed to decompress font\n");
-    // }
-
-
-    const unsigned char* font_data = (const unsigned char*) &font_roboto_mono;
-    int font_data_size = sizeof(font_roboto_mono);
-
     // must be called after window is initialised
-    Font font = LoadFontFromMemory(
-        ".ttf", 
-        font_data, 
-        font_data_size, 
-        16, 
-        0, 
-        0
-    );
+    Font font = load_compressed_font(compressed_font_roboto_mono, sizeof(compressed_font_roboto_mono));
+
     set_gui_style(config, font);
 
     if(!IsFontValid(font)){
@@ -379,9 +403,8 @@ int main(int argc, char** argv)
     }
 
     run(state, config, font);    
-    
-    // MemFree((void*) font_data);
 
+    UnloadFont(font);
     state_free(state);
     input_free(input);
     config_free(config);

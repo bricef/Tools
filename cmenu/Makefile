@@ -47,7 +47,7 @@ DEPFLAGS =
 OBJECT_FILES = build/args.o
 STATIC_LIBS = lib/lz4/lib/liblz4.a
 
-COMPRESS_CMD = lz4 -1
+COMPRESS_CMD = lz4 -c -f -12
 
 FILES = main.c config.c state.c utils.c press.c
 

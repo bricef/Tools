@@ -64,7 +64,7 @@ target/cmenu: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
 	gcc -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)	
 
 target/cmenu-debug: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
-	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) build/args.o lib/lz4/liblz4.a $(CFLAGS) $(LIBFLAGS)
+	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)
 
 target/cmenu-asan: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
 	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)

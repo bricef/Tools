@@ -1,4 +1,4 @@
-.PHONY: run clean all install-deps debug
+.PHONY: run clean all install-deps debug valgrind valgrind-quick valgrind-errors leaks asan-test
 
 # Try to get raylib flags from pkg-config, fallback to manual flags if not found
 RAYLIB_PKG_CONFIG := $(shell pkg-config --exists raylib && echo "yes" || echo "no")
@@ -44,6 +44,8 @@ CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-variable -Wno-unused-para
 
 DEPFLAGS = 
 
+OBJECT_FILES = build/args.o
+STATIC_LIBS = lib/lz4/lib/liblz4.a
 
 COMPRESS_CMD = lz4 -1
 
@@ -60,17 +62,17 @@ build/args.o: lib/args/src/args.c
 lib/lz4/lib/liblz4.a:
 	make -C lib/lz4	
 
-target/cmenu: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
-	gcc -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)	
+target/cmenu: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
+	gcc -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)	
 
-target/cmenu-debug: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
-	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)
+target/cmenu-debug: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
+	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)
 
-target/cmenu-asan: $(FILES) target fonts build/args.o lib/lz4/lib/liblz4.a
-	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) build/args.o lib/lz4/lib/liblz4.a $(CFLAGS) $(LIBFLAGS)
+target/cmenu-asan: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
+	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)
 
 debug: target/cmenu-debug
-	lldb -f target/cmenu-debug -o run -o exit
+	lldb -f target/cmenu-debug  -o "process launch -i tests/basic.txt" -o exit
 
 valgrind: target/cmenu-debug
 	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt

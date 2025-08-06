@@ -71,10 +71,8 @@ The output binaries will be in the `target/` directory.
 
 ## TODO
 
-- [x] Fix ugly font
 - [ ] Support mouse click
 - [ ] Allow custom font
-- [x] Fix styling with input box
 - [ ] Enable custom colours
 - [ ] Fix arrow navigation and item selection highlight
 - [ ] Create test suite
@@ -83,7 +81,13 @@ The output binaries will be in the `target/` directory.
 - [ ] Add number shortcuts option
 - [ ] Exit on lose focus by default, with option to prevent
 - [ ] Build for windows (?)
-- [ ] enable vertical mode
+
+## Done 
+
+- [x] enable vertical mode
+- [x] Enable center of screen mode with vertical
+- [x] Fix ugly font
+- [x] Fix styling with input box
 
 ## Feature inspiration 
 

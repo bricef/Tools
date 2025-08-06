@@ -18,6 +18,9 @@ typedef struct {
     int height;
     int font_size;
     int padding;
+    bool vertical;
+    int vlines; // Number of vertical lines to draw
+    int border_width;
     Color active_background;
     Color active_foreground;
     Color prompt_background;

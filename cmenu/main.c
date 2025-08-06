@@ -67,13 +67,20 @@ void input_free(Input* input){
 
 
 void position_window(const Config* config){
-    // Get monitor info
+      // Get monitor info
     int monitor_width = GetMonitorWidth(config->monitor);
     int monitor_height = GetMonitorHeight(config->monitor);
 
-    // Get window info
-    int width = config->width ? config->width : GetMonitorWidth(config->monitor);
-    int height = config->height ? config->height : 50;
+    int width = config->width ? config->width : monitor_width;
+
+    int line_height = config->font_size + config->padding * 2;
+
+    int height;
+    if (config->vertical){
+        height = config->vlines * line_height;
+    }else{
+        height = config->height ? config->height : line_height;
+    }
     
     int y = config->y;
     int x = config->x;
@@ -129,15 +136,11 @@ void handle_input(State* state){ // Could make state immutable by returning a ne
 }
 
 
-void run(State* state, const Config* config, Font font){
-    while (!WindowShouldClose()){
-        position_window(config);
-        handle_input(state);
-        state_filter(state);
-
-        // Draw
+void draw_horizontal(State* state, const Config* config, Font font){
+    // Draw
         BeginDrawing();
             ClearBackground(config->normal_background);
+            
             int offset_x = 0;
             int offset_y = 0;
             
@@ -190,13 +193,107 @@ void run(State* state, const Config* config, Font font){
                         config->normal_foreground
                     );
                 }
-
-                
-
                 offset_x += box_width;
             }
 
+            DrawRectangleLinesEx(
+                (Rectangle){ 0, 0, GetScreenWidth(), GetScreenHeight() }, 
+                (float) config->border_width, 
+                config->normal_foreground
+            );
+
         EndDrawing();
+}
+
+void draw_vertical(State* state, const Config* config, Font font){
+    BeginDrawing();
+            ClearBackground(config->normal_background);
+            
+            
+            int offset_x = 0;
+            int offset_y = 0;
+            
+            int prompt_height = 0;
+            int prompt_width = 0;
+
+            if(config->prompt != NULL && config->prompt[0] != '\0'){
+                Vector2 prompt_size = MeasureTextEx(font, config->prompt, config->font_size, 0.0);
+                prompt_height = prompt_size.y + config->padding * 2;
+                prompt_width = prompt_size.x + config->padding * 2;
+                DrawTextEx(
+                    font,
+                    config->prompt,
+                    (Vector2){ offset_x + config->padding, offset_y + config->padding },
+                    config->font_size,
+                    1,
+                    config->prompt_foreground
+                );
+                // offset_y += prompt_height;
+                // offset_y += config->padding;
+            }
+
+
+            int input_width = (GetScreenWidth() - prompt_width) - (prompt_width > 0 ? config->padding : 0);
+
+
+            // Draw input
+            GuiTextBox(
+                (Rectangle){ prompt_width + (prompt_width > 0 ? config->padding : 0), offset_y, input_width, config->height }, 
+                state->text, 
+                config->font_size, 
+                true
+            );
+            offset_y += config->height;
+    
+            for (int i = 0; i < state->filtered_options_count; i++){
+                int text_width = MeasureText(state->filtered_options[i], config->font_size);
+                int box_width = text_width + config->padding * 2;
+                int box_height = config->font_size + config->padding * 2;
+
+                if (i == state->active){
+                    DrawRectangle(offset_x, offset_y, box_width, box_height, config->active_background);
+                    DrawTextEx(
+                        font,
+                        state->filtered_options[i],
+                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
+                        config->font_size,
+                        0,
+                        config->active_foreground
+                    );
+                }else{
+                    DrawTextEx(
+                        font,
+                        state->filtered_options[i],
+                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
+                        config->font_size,
+                        0,
+                        config->normal_foreground
+                    );
+                }
+                offset_y += box_height;
+            }
+
+            DrawRectangleLinesEx(
+                (Rectangle){ 0, 0, GetScreenWidth(), GetScreenHeight() }, 
+                (float) config->border_width, 
+                config->normal_foreground
+            );
+
+        EndDrawing();
+}
+
+
+void run(State* state, const Config* config, Font font){
+    while (!WindowShouldClose()){
+        position_window(config);
+        handle_input(state);
+        state_filter(state);
+
+        if (config->vertical){
+            draw_vertical(state, config, font);
+        }else{
+            draw_horizontal(state, config, font);
+        }
     }
 }
 
@@ -254,24 +351,6 @@ int main(int argc, char** argv)
         0
     );
     set_gui_style(config, font);
-
-    
-    
-    /*
-    
-    GuiSetStyle(TEXTBOX, TEXT_COLOR_NORMAL, ColorToInt(config->input_foreground));
-    GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(config->input_foreground));
-*/
-
-    // GuiSetStyle(TEXTBOX, BASE_COLOR_NORMAL, ColorToInt(config->prompt_background));
-    
-    // GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(config->input_foreground));
-    // GuiSetStyle(TEXTBOX, BASE_COLOR_FOCUSED, ColorToInt(config->prompt_background));
-    // GuiSetStyle(TEXTBOX, TEXT_COLOR_FOCUSED, ColorToInt(config->prompt_text));
-    
-    
-    // Font font = LoadFontEx("fonts/roboto.ttf", 16, 0, 0);
-    //  Font font = LoadFont("fonts/mecha.png");
 
     if(!IsFontValid(font)){
         error("Failed to load font\n");

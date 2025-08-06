@@ -11,7 +11,7 @@ const char* helptext = "Usage: cmenu [options]\n"
 "Options:\n"
 "\n"
 "    -b --bottom            Appears at the bottom of the screen. (default: false)\n"
-"    -c --center            Centers the window. (default: false)\n"
+"    -c --center            Centers the window. (default: false, overrides x and y)\n"
 "    -m --monitor MONITOR   Try to display on monitor number supplied. Monitor\n"
 "                           numbers are starting from 0. (default: 0)\n"
 "    -p --prompt PROMPT     Prompt to be displayed to the left of the input field.\n"
@@ -20,6 +20,8 @@ const char* helptext = "Usage: cmenu [options]\n"
 "    -y POSITION            Y position of the window. (default: 0)\n"
 "    -w --width WIDTH       Width of the window. (default: screen width)\n"
 "    --font-size FONT_SIZE  Font size of the prompt and input. (default: 16px)\n"
+"    -v --vertical          Vertical menu. (default: false)\n" // TODO: allow setting of vlines
+"    --border-width WIDTH   Border width of the menu. (default: 0)\n"
 "\n"
 "Behaviour:\n"
 "\n"
@@ -49,8 +51,11 @@ Config* config_new(
     int y,
     int width,
     int font_size,
-    int padding
-){
+    int padding,
+    bool vertical,
+    int vlines,
+    int border_width
+){  
     Config* config = (Config*) malloc(sizeof(Config));
     panic_if_null(config);
 
@@ -64,6 +69,9 @@ Config* config_new(
     config->width = width;
     config->font_size = font_size;
     config->padding = padding;
+    config->vertical = vertical;
+    config->vlines = 10;
+    config->border_width = border_width;
 
     config->active_background = RED;
     config->active_foreground = WHITE;
@@ -94,7 +102,8 @@ Config* config_from_args(int argc, char** argv){
     ap_add_int_opt(parser, "y", 0);
     ap_add_int_opt(parser, "w width", 0);
     ap_add_int_opt(parser, "font-size", 16);
-
+    ap_add_flag(parser, "v vertical");
+    ap_add_int_opt(parser, "border-width", 0);
     // Parse args
     ap_parse(parser, argc, argv);
 
@@ -108,7 +117,10 @@ Config* config_from_args(int argc, char** argv){
         ap_get_int_value(parser, "y"),
         ap_get_int_value(parser, "w"),
         ap_get_int_value(parser, "font-size"),
-        8 // Padding
+        8, // Padding
+        ap_found(parser, "v"),
+        10, // Number of vertical lines to draw
+        ap_get_int_value(parser, "border-width")
     );
 
     ap_free(parser);
@@ -117,28 +129,25 @@ Config* config_from_args(int argc, char** argv){
 
 
 void config_print(const Config* config){
-    fprintf(stderr, "Config.bottom: %d\n", config->bottom);
     fprintf(stderr, "Config.monitor: %d\n", config->monitor);
     fprintf(stderr, "Config.prompt: \"%s\"\n", config->prompt);
     fprintf(stderr, "Config.x: %d\n", config->x);
     fprintf(stderr, "Config.y: %d\n", config->y);
     fprintf(stderr, "Config.width: %d\n", config->width);
     fprintf(stderr, "Config.height: %d\n", config->height);
-}
-
-
-int config_get_width(const Config* config){
-    return config->width ? config->width : GetMonitorWidth(config->monitor);
-}
-
-int config_get_height(const Config* config){
-    return config->height ? config->height : 50;
-}
-
-int config_get_x(const Config* config){
-    return config->x;
-}
-
-int config_get_y(const Config* config){
-    return config->y;
+    fprintf(stderr, "Config.vertical: %d\n", config->vertical);
+    fprintf(stderr, "Config.vlines: %d\n", config->vlines);
+    fprintf(stderr, "Config.font_size: %d\n", config->font_size);
+    fprintf(stderr, "Config.padding: %d\n", config->padding);
+    fprintf(stderr, "Config.active_background: %x\n", ColorToInt(config->active_background));
+    fprintf(stderr, "Config.active_foreground: %x\n", ColorToInt(config->active_foreground));
+    fprintf(stderr, "Config.prompt_background: %x\n", ColorToInt(config->prompt_background));
+    fprintf(stderr, "Config.prompt_foreground: %x\n", ColorToInt(config->prompt_foreground));
+    fprintf(stderr, "Config.input_background: %x\n", ColorToInt(config->input_background));
+    fprintf(stderr, "Config.input_foreground: %x\n", ColorToInt(config->input_foreground));
+    fprintf(stderr, "Config.normal_background: %x\n", ColorToInt(config->normal_background));
+    fprintf(stderr, "Config.normal_foreground: %x\n", ColorToInt(config->normal_foreground));
+    fprintf(stderr, "Config.center: %d\n", config->center);
+    fprintf(stderr, "Config.bottom: %d\n", config->bottom);
+    fprintf(stderr, "Config.border_width: %d\n", config->border_width);
 }

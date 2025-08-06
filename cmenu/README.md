@@ -84,10 +84,12 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] set up companion shell menu script (use `bmenu` format?)
 - [ ] Add number shortcuts option
 - [ ] Build for windows (?)
-- [ ] Compress raw fonts and assets (using LZ4? Zstd?)
+- [ ] Add timing reporting for first render
+
 
 ## Done 
 
+- [x] Compress raw fonts and assets (using LZ4? Zstd?)
 - [x] Set up valgrind check
 - [x] Exit on lose focus by default, with option to prevent
 - [x] enable vertical mode

@@ -52,6 +52,7 @@ typedef struct {
     const char** filtered_options;
     int focus;
     char text[255];
+    bool show_shortcuts;
 } State;
 
 State* new_state(const Config* config, const Input* input);

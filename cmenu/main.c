@@ -112,7 +112,61 @@ void position_window(const Config* config){
     SetWindowPosition(x, y);
 }
 
+
+void select_option(int index){
+    printf("SELECTING OPTION %d\n", index);
+}
+
+void handle_shortcuts(State* state){
+    switch(GetKeyPressed()){
+        case KEY_ONE:
+        case KEY_KP_1:
+            select_option(1);
+            break;
+        case KEY_TWO:
+        case KEY_KP_2:
+            select_option(2);
+            break;
+        case KEY_THREE:
+        case KEY_KP_3:
+            select_option(3);
+            break;
+        case KEY_FOUR:
+        case KEY_KP_4:
+            select_option(4);
+            break;
+        case KEY_FIVE:
+        case KEY_KP_5:
+            select_option(5);
+            break;
+        case KEY_SIX:
+        case KEY_KP_6:
+            select_option(6);
+            break;
+        case KEY_SEVEN:
+        case KEY_KP_7:
+            select_option(7);
+            break;
+        case KEY_EIGHT:
+        case KEY_KP_8:
+            select_option(8);
+            break;
+        case KEY_NINE:
+        case KEY_KP_9:
+            select_option(9);
+            break;
+    };
+}
+
 void handle_input(State* state){ // Could make state immutable by returning a new state
+
+    if(IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)){
+        state->show_shortcuts = true;
+        handle_shortcuts(state);
+    }else{
+        state->show_shortcuts = false;
+    }
+
     if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_RIGHT)) {
         // printf("DOWN\n");
         state_select_next(state);

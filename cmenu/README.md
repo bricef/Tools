@@ -12,7 +12,7 @@ Usage: cmenu [options]
 Options:
 
     -b --bottom            Appears at the bottom of the screen. (default: false)
-    -c --center            Centers the window. (default: false)
+    -c --center            Centers the window. (default: false, overrides x and y)
     -m --monitor MONITOR   Try to display on monitor number supplied. Monitor
                            numbers are starting from 0. (default: 0)
     -p --prompt PROMPT     Prompt to be displayed to the left of the input field.
@@ -21,19 +21,22 @@ Options:
     -y POSITION            Y position of the window. (default: 0)
     -w --width WIDTH       Width of the window. (default: screen width)
     --font-size FONT_SIZE  Font size of the prompt and input. (default: 16px)
+    -v --vertical          Vertical menu. (default: false)
+    --border-width WIDTH   Border width of the menu. (default: 0)
+    --persist              Don't exit when the window loses focus. (default: false)
 
 Behaviour:
 
     The menu will be read from STDIN as newline separated strings. Order is preserved.
 
     If the user input is a match for an option and the user has not selected an
-    option, the first matching option is printed to stdout and the program
+    option, the first matching option is printed to stdout and the program 
     exits with code 0.
 
-    If the user input is not a match for an option, the user input is printed
+    If the user input is not a match for an option, the user input is printed 
     to stdout and the program exits with code 2.
 
-    If the user input is empty, nothing is printed and the program exits with
+    If the user input is empty, nothing is printed and the program exits with 
     code 0.
 
     If the user presses ESC, the program exits with code 0.
@@ -68,6 +71,12 @@ $ make
 ```
 
 The output binaries will be in the `target/` directory.
+
+All in one build and run:
+
+```shell
+$ make clean && make && ./build/target/cmenu <tests/basic.txt
+```
 
 ### Testing
 

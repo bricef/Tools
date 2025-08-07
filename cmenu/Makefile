@@ -36,15 +36,19 @@ TTF_FILES = $(wildcard fonts/*.ttf)
 FONT_FILES = $(patsubst fonts/%.ttf,build/font_%.h,$(TTF_FILES))
 COMPRESSED_FONT_FILES = $(patsubst fonts/%.ttf,build/compressed_font_%.h,$(TTF_FILES))
 
+BUILD_DIR = build
+TARGET_DIR = ${BUILD_DIR}/target
+
+CC = gcc
 
 # Always include necessary system libraries
 CFLAGS = $(RAYLIB_FLAGS) $(PLATFORM_FLAGS)
-CFLAGS += -I./lib/ -I./lib/args/src/ -I./build/ -I./lib/lz4/lib/
+CFLAGS += -I./lib/ -I./lib/args/src/ -I./${BUILD_DIR}/ -I./lib/lz4/lib/
 CFLAGS += -Wall -Wextra -Werror --pedantic -Wno-unused-variable -Wno-unused-parameter -Wno-unused-but-set-variable
 
 DEPFLAGS = 
 
-OBJECT_FILES = build/args.o
+OBJECT_FILES = ${BUILD_DIR}/args.o
 STATIC_LIBS = lib/lz4/lib/liblz4.a
 
 COMPRESS_CMD = lz4 -c -f -12
@@ -54,40 +58,40 @@ FILES = main.c config.c state.c utils.c press.c
 DEPS = lib/args/src/args.c
 
 
-all: target/cmenu
+all: ${TARGET_DIR}/cmenu
 
-build/args.o: lib/args/src/args.c
-	gcc -c -o $@ $(DEPFLAGS) $<
+${BUILD_DIR}/args.o: lib/args/src/args.c
+	$(CC) -c -o $@ $(DEPFLAGS) $<
 
 lib/lz4/lib/liblz4.a:
 	make -C lib/lz4	
 
-target/cmenu: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
-	gcc -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)	
+${TARGET_DIR}/cmenu: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
+	$(CC) -O3 -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)	
 
-target/cmenu-debug: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
-	gcc -g3 -O0 -DDEBUG -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)
+${TARGET_DIR}/cmenu-debug: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
+	$(CC) -g3 -O0 -DDEBUG -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)
 
-target/cmenu-asan: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
-	gcc -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)
+${TARGET_DIR}/cmenu-asan: $(FILES) target fonts $(OBJECT_FILES) $(STATIC_LIBS)
+	$(CC) -g3 -O0 -fsanitize=address -fno-omit-frame-pointer -o $@ $(FILES) $(OBJECT_FILES) $(STATIC_LIBS) $(CFLAGS) $(LIBFLAGS)
 
-debug: target/cmenu-debug
-	lldb -f target/cmenu-debug  -o "process launch -i tests/basic.txt" -o exit
+debug: ${TARGET_DIR}/cmenu-debug
+	lldb -f ${TARGET_DIR}/cmenu-debug  -o "process launch -i tests/basic.txt" -o exit
 
-valgrind: target/cmenu-debug
-	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt
+valgrind: ${TARGET_DIR}/cmenu-debug
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --track-origins=yes --verbose --log-file=valgrind-out.txt --suppressions=valgrind.supp ${TARGET_DIR}/cmenu-debug <tests/basic.txt
 
-valgrind-quick: target/cmenu-debug
-	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt
+valgrind-quick: ${TARGET_DIR}/cmenu-debug
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --suppressions=valgrind.supp ./${TARGET_DIR}/cmenu-debug <tests/basic.txt
 
-valgrind-errors: target/cmenu-debug
-	valgrind --tool=memcheck --track-origins=yes --suppressions=valgrind.supp ./target/cmenu-debug <tests/basic.txt
+valgrind-errors: ${TARGET_DIR}/cmenu-debug
+	valgrind --tool=memcheck --track-origins=yes --suppressions=valgrind.supp ${TARGET_DIR}/cmenu-debug <tests/basic.txt
 
-leaks: target/cmenu-debug tests/basic.txt
-	MallocStackLogging=1 leaks --atExit -- ./target/cmenu-debug  <tests/basic.txt 
+leaks: ${TARGET_DIR}/cmenu-debug tests/basic.txt
+	MallocStackLogging=1 leaks --atExit -- ${TARGET_DIR}/cmenu-debug  <tests/basic.txt 
 
-asan-test: target/cmenu-asan tests/basic.txt
-	./target/cmenu-asan <tests/basic.txt
+asan-test: ${TARGET_DIR}/cmenu-asan tests/basic.txt
+	${TARGET_DIR}/cmenu-asan <tests/basic.txt
 
 fonts: $(FONT_FILES) $(COMPRESSED_FONT_FILES)
 
@@ -102,23 +106,25 @@ build/font_%.h: fonts/%.ttf build
 build/compressed_font_%.h: fonts/%.ttf build 
 	cat ${<} | ${COMPRESS_CMD} | xxd -i > $@.xxd
 	NAME=compressed_font_$(subst fonts/,,$(basename ${<}));\
-	echo "const unsigned char $$NAME []= {" > build/prefix; \
+	echo "// Compressed font for ${<}" > build/prefix; \
+	echo "// Compressed with lz4 -c -f -12" >> build/prefix; \
+	echo "const unsigned char $$NAME []= {" >> build/prefix; \
 	echo "};" > build/suffix
 	cat build/prefix ${@}.xxd build/suffix > $@
 	rm build/prefix build/suffix build/*.xxd
 
-run: target/cmenu
-	./target/cmenu
+run: ${TARGET_DIR}/cmenu
+	${TARGET_DIR}/cmenu
 
 clean:
-	rm -rf target/
-	rm -rf build/
+	rm -rf ${TARGET_DIR}/
+	rm -rf ${BUILD_DIR}/
 
 build:
-	mkdir -p build
+	mkdir -p ${BUILD_DIR}
 
 target:
-	mkdir -p target
+	mkdir -p ${TARGET_DIR}
 
 install-deps:
 	@echo "Installing raylib..."

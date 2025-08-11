@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "raygui.h": "c",
-        "raylib.h": "c",
-        "types.h": "c"
-    },
-    "editor.rulers": [80]
-}

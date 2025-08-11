@@ -113,47 +113,56 @@ void position_window(const Config* config){
 }
 
 
-void select_option(int index){
-    printf("SELECTING OPTION %d\n", index);
+void select_option(State* state, int index){
+    // printf("SELECTING OPTION %d\n", index);
+    if(index > state->filtered_options_count || index < 1){
+       return;
+    }
+
+    state->active = index-1;
+    state->scrollIndex = index-1;
+    state->focus = 1;
+    printf("%s\n", state->filtered_options[state->active]);
+    exit(0);
 }
 
 void handle_shortcuts(State* state){
     switch(GetKeyPressed()){
         case KEY_ONE:
         case KEY_KP_1:
-            select_option(1);
+            select_option(state, 1);
             break;
         case KEY_TWO:
         case KEY_KP_2:
-            select_option(2);
+            select_option(state, 2);
             break;
         case KEY_THREE:
         case KEY_KP_3:
-            select_option(3);
+            select_option(state, 3);
             break;
         case KEY_FOUR:
         case KEY_KP_4:
-            select_option(4);
+            select_option(state, 4);
             break;
         case KEY_FIVE:
         case KEY_KP_5:
-            select_option(5);
+            select_option(state, 5);
             break;
         case KEY_SIX:
         case KEY_KP_6:
-            select_option(6);
+            select_option(state, 6);
             break;
         case KEY_SEVEN:
         case KEY_KP_7:
-            select_option(7);
+            select_option(state, 7);
             break;
         case KEY_EIGHT:
         case KEY_KP_8:
-            select_option(8);
+            select_option(state, 8);
             break;
         case KEY_NINE:
         case KEY_KP_9:
-            select_option(9);
+            select_option(state, 9);
             break;
     };
 }
@@ -182,7 +191,7 @@ void handle_input(State* state){ // Could make state immutable by returning a ne
             printf("%s\n", state->filtered_options[state->active]);
             exit(0);
         }
-        
+
         if (state->text[0] == '\0'){
             exit(0);
         }
@@ -199,6 +208,88 @@ void handle_input(State* state){ // Could make state immutable by returning a ne
 }
 
 
+
+int draw_prompt(State* state, const Config* config, Font font, int x, int y){
+    if(config->prompt != NULL && config->prompt[0] != '\0'){
+        int prompt_width = MeasureTextEx(font, config->prompt, config->font_size, 0.0).x + config->padding * 2;
+        DrawTextEx(
+            font,
+            config->prompt,
+            (Vector2){ x + config->padding, y + config->padding },
+            config->font_size,
+            1,
+            config->prompt_foreground
+        );
+        return prompt_width;
+        // offset_x += config->padding;
+    }
+    return 0;
+}
+
+void draw_input(State* state, const Config* config, Font font, int x, int y, int width){
+    GuiTextBox(
+        (Rectangle){ x, y, width, config->height }, 
+        state->text, 
+        config->font_size, 
+        true
+    );
+}
+
+int draw_option(State* state, const Config* config, Font font, int x, int y, int index, const char* text){
+    //MeasureTextEx(Font font, const char *text, float fontSize, float spacing); 
+    int text_width = MeasureTextEx(font, text, config->font_size, 0.0).x;
+                
+    int shortcut_padding = 1;
+    char shortcut[2] = { '1' + index, '\0' };
+    int shortcut_width = MeasureTextEx(font, (const char *)&shortcut, config->font_size, 0.0).x+shortcut_padding*2;
+    int shortcut_height = config->font_size;
+
+    int box_width = text_width + shortcut_width + config->padding * 2;
+
+    if (index == state->active){
+        DrawRectangle(x, y, box_width, config->height, config->active_background);
+        DrawTextEx(
+            font,
+            text,
+            (Vector2){ x + config->padding, y + config->padding },
+            config->font_size,
+            0,
+            config->active_foreground
+        );
+    }else{
+        DrawTextEx(
+            font,
+            text,
+            (Vector2){ x + config->padding, y + config->padding },
+            config->font_size,
+            0,
+            config->normal_foreground
+        );
+    }
+    if (state->show_shortcuts && index < 9){
+        
+        Rectangle shortcut_box = (Rectangle){ 
+            (x+box_width)-shortcut_width, 
+            (y+config->height)-shortcut_height,
+            shortcut_width, 
+            shortcut_height 
+        };
+
+        DrawRectangle(shortcut_box.x, shortcut_box.y, shortcut_box.width, shortcut_box.height, WHITE);
+        DrawTextEx(
+            font,
+            (const char*) shortcut,
+            (Vector2){ shortcut_box.x+shortcut_padding, shortcut_box.y },
+            config->font_size,
+            0,
+            BLACK
+        );
+    }
+    return box_width;
+
+
+}
+
 void draw_horizontal(State* state, const Config* config, Font font){
     // Draw
         BeginDrawing();
@@ -206,56 +297,17 @@ void draw_horizontal(State* state, const Config* config, Font font){
             
             int offset_x = 0;
             int offset_y = 0;
+
+            int prompt_width = draw_prompt(state, config, font, offset_x, offset_y)+ config->padding;
+            offset_x += (prompt_width > 0 ? prompt_width : 0);
+
             
-            if(config->prompt != NULL && config->prompt[0] != '\0'){
-                int prompt_width = MeasureTextEx(font, config->prompt, config->font_size, 0.0).x + config->padding * 2;
-                DrawTextEx(
-                    font,
-                    config->prompt,
-                    (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                    config->font_size,
-                    1,
-                    config->prompt_foreground
-                );
-                offset_x += prompt_width;
-                offset_x += config->padding;
-            }
-
             int input_width = 200;
-
-            // Draw input
-            GuiTextBox(
-                (Rectangle){ offset_x, offset_y, input_width, config->height }, 
-                state->text, 
-                config->font_size, 
-                true
-            );
+            draw_input(state, config, font, offset_x, offset_y, input_width);
             offset_x += input_width;
     
             for (int i = 0; i < state->filtered_options_count; i++){
-                int text_width = MeasureText(state->filtered_options[i], config->font_size);
-                int box_width = text_width + config->padding * 2;
-
-                if (i == state->active){
-                    DrawRectangle(offset_x, offset_y, box_width, config->height, config->active_background);
-                    DrawTextEx(
-                        font,
-                        state->filtered_options[i],
-                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                        config->font_size,
-                        0,
-                        config->active_foreground
-                    );
-                }else{
-                    DrawTextEx(
-                        font,
-                        state->filtered_options[i],
-                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                        config->font_size,
-                        0,
-                        config->normal_foreground
-                    );
-                }
+                int box_width = draw_option(state, config, font, offset_x, offset_y, i, state->filtered_options[i]);
                 offset_x += box_width;
             }
 
@@ -272,68 +324,18 @@ void draw_vertical(State* state, const Config* config, Font font){
     BeginDrawing();
             ClearBackground(config->normal_background);
             
-            
             int offset_x = 0;
             int offset_y = 0;
             
-            int prompt_height = 0;
-            int prompt_width = 0;
+            int prompt_width = draw_prompt(state, config, font, offset_x, offset_y) + config->padding;
 
-            if(config->prompt != NULL && config->prompt[0] != '\0'){
-                Vector2 prompt_size = MeasureTextEx(font, config->prompt, config->font_size, 0.0);
-                prompt_height = prompt_size.y + config->padding * 2;
-                prompt_width = prompt_size.x + config->padding * 2;
-                DrawTextEx(
-                    font,
-                    config->prompt,
-                    (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                    config->font_size,
-                    1,
-                    config->prompt_foreground
-                );
-                // offset_y += prompt_height;
-                // offset_y += config->padding;
-            }
-
-
-            int input_width = (GetScreenWidth() - prompt_width) - (prompt_width > 0 ? config->padding : 0);
-
-
-            // Draw input
-            GuiTextBox(
-                (Rectangle){ prompt_width + (prompt_width > 0 ? config->padding : 0), offset_y, input_width, config->height }, 
-                state->text, 
-                config->font_size, 
-                true
-            );
+            int input_width = (GetScreenWidth() - prompt_width);
+            draw_input(state, config, font, offset_x+prompt_width, offset_y, input_width);
             offset_y += config->height;
     
             for (int i = 0; i < state->filtered_options_count; i++){
-                int text_width = MeasureText(state->filtered_options[i], config->font_size);
-                int box_width = text_width + config->padding * 2;
-                int box_height = config->font_size + config->padding * 2;
-
-                if (i == state->active){
-                    DrawRectangle(offset_x, offset_y, box_width, box_height, config->active_background);
-                    DrawTextEx(
-                        font,
-                        state->filtered_options[i],
-                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                        config->font_size,
-                        0,
-                        config->active_foreground
-                    );
-                }else{
-                    DrawTextEx(
-                        font,
-                        state->filtered_options[i],
-                        (Vector2){ offset_x + config->padding, offset_y + config->padding },
-                        config->font_size,
-                        0,
-                        config->normal_foreground
-                    );
-                }
-                offset_y += box_height;
+                int box_width = draw_option(state, config, font, offset_x, offset_y, i, state->filtered_options[i]);
+                offset_y += config->height+config->padding*2;
             }
 
             DrawRectangleLinesEx(

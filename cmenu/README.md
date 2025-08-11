@@ -90,12 +90,12 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] Create test suite
 - [ ] Write launcher script (as per `dmenu_run`)
 - [ ] set up companion shell menu script (use `bmenu` format?)
-- [ ] Add number shortcuts option
 - [ ] Build for windows (?)
 - [ ] Add timing reporting for first render
 
 ## Done 
 
+- [x] Add number shortcuts option
 - [x] Fix arrow navigation and item selection highlight
 - [x] Compress raw fonts and assets (using LZ4? Zstd?)
 - [x] Set up valgrind check

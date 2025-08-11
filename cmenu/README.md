@@ -92,6 +92,7 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] set up companion shell menu script (use `bmenu` format?)
 - [ ] Build for windows (?)
 - [ ] Add timing reporting for first render
+- [ ] Add shortcut instructions to readme
 
 ## Done 
 

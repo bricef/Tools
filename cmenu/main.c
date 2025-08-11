@@ -122,8 +122,9 @@ void select_option(State* state, int index){
     state->active = index-1;
     state->scrollIndex = index-1;
     state->focus = 1;
+    state->quit = true;
+    state->exit_status = CMENU_SUCCESS;
     printf("%s\n", state->filtered_options[state->active]);
-    exit(0);
 }
 
 void handle_shortcuts(State* state){
@@ -189,21 +190,28 @@ void handle_input(State* state){ // Could make state immutable by returning a ne
     if(IsKeyPressed(KEY_ENTER)) {
         if (state->active > 0 ){
             printf("%s\n", state->filtered_options[state->active]);
-            exit(0);
+            state->exit_status = CMENU_SUCCESS;
+            state->quit = true;
+            return;
         }
 
         if (state->text[0] == '\0'){
-            exit(0);
+            state->exit_status = CMENU_USER_QUIT;
+            state->quit = true;
+            return;
         }
 
         if (state->filtered_options_count > 0){
             printf("%s\n", state->filtered_options[state->active]);
-            exit(0);
+            state->exit_status = CMENU_SUCCESS;
+            state->quit = true;
+            return;
         } 
 
         printf("%s\n", state->text);
-        exit(2);
-        
+        state->exit_status = CMENU_COMMAND_NOT_FOUND;
+        state->quit = true;
+        return;
     }
 }
 
@@ -348,10 +356,16 @@ void draw_vertical(State* state, const Config* config, Font font){
 }
 
 
-void run(State* state, const Config* config, Font font){
+int run(State* state, const Config* config, Font font){
     while (!WindowShouldClose()){
         if (!IsWindowFocused() && !config->persist){
-            break;
+            state->exit_status = CMENU_USER_QUIT;
+            state->text[0] = '\0';
+            return state->exit_status;
+        }
+
+        if(state->quit){
+            return state->exit_status;
         }
 
         position_window(config);
@@ -364,6 +378,8 @@ void run(State* state, const Config* config, Font font){
             draw_horizontal(state, config, font);
         }
     }
+    state->exit_status = CMENU_USER_QUIT;
+    return state->exit_status;
 }
 
 
@@ -410,8 +426,8 @@ Font load_compressed_font(const unsigned char* compressed_font, int compressed_f
     char* font_data = malloc(font_data_size_max);
 
     if (font_data == NULL){
-        error("Failed to allocate memory for font data\n");
-        exit(1);
+        fprintf(stderr, "Failed to allocate memory for font data\n");
+        exit(CMENU_SYSTEM_ERROR);
     }
 
     int font_data_size = press_decompress_data (
@@ -422,7 +438,7 @@ Font load_compressed_font(const unsigned char* compressed_font, int compressed_f
     );
     if (press_is_error(font_data_size)){
         fprintf(stderr, "Failed to decompress font (ERROR: %s)\n", press_get_error_name(font_data_size));
-        exit(1);
+        exit(CMENU_INTERNAL_ERROR);
     }
 
     // must be called after window is initialised
@@ -450,16 +466,18 @@ int main(int argc, char** argv)
     
     setup(config);
     
-    // must be called after window is initialised
+    
+    // must be called after window is initialised :( 
     Font font = load_compressed_font(compressed_font_roboto_mono, sizeof(compressed_font_roboto_mono));
-
-    set_gui_style(config, font);
-
     if(!IsFontValid(font)){
-        error("Failed to load font\n");
+        fprintf(stderr, "Failed to load font\n");
+        exit(CMENU_INTERNAL_ERROR);
     }
+    set_gui_style(config, font);
+    
 
-    run(state, config, font);    
+    // Run the thing
+    int exit_status = run(state, config, font);    
 
     UnloadFont(font);
     state_free(state);
@@ -467,5 +485,5 @@ int main(int argc, char** argv)
     config_free(config);
 
     CloseWindow();
-    return 0;
+    return exit_status;
 }

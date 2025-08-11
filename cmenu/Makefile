@@ -95,7 +95,7 @@ asan-test: ${TARGET_DIR}/cmenu-asan tests/basic.txt
 
 fonts: $(FONT_FILES) $(COMPRESSED_FONT_FILES)
 
-build/font_%.h: fonts/%.ttf build 
+build/font_%.h: fonts/%.ttf 
 	cat ${<} | xxd -i > $@.xxd
 	NAME=font_$(subst fonts/,,$(basename ${<}));\
 	echo "const unsigned char $$NAME []= {" > build/prefix; \
@@ -103,7 +103,7 @@ build/font_%.h: fonts/%.ttf build
 	cat build/prefix ${@}.xxd build/suffix > $@
 	rm build/prefix build/suffix build/*.xxd
 
-build/compressed_font_%.h: fonts/%.ttf build 
+build/compressed_font_%.h: fonts/%.ttf 
 	cat ${<} | ${COMPRESS_CMD} | xxd -i > $@.xxd
 	NAME=compressed_font_$(subst fonts/,,$(basename ${<}));\
 	echo "// Compressed font for ${<}" > build/prefix; \

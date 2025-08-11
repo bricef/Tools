@@ -7,6 +7,16 @@
 
 #define MAX_INPUT_LENGTH 255
 
+typedef enum {
+    CMENU_SUCCESS = 0,
+    CMENU_COMMAND_NOT_FOUND = 2,
+    CMENU_USER_QUIT = 0,
+    CMENU_SYSTEM_ERROR = 1,
+    CMENU_INTERNAL_ERROR = 3,
+    CMENU_ERROR_GENERIC = 4,
+
+} ExitStatus;
+
 typedef struct {
     bool bottom;
     bool center;
@@ -53,6 +63,8 @@ typedef struct {
     int focus;
     char text[MAX_INPUT_LENGTH];
     bool show_shortcuts;
+    bool quit;
+    ExitStatus exit_status;
 } State;
 
 State* new_state(const Config* config, const Input* input);
@@ -65,5 +77,7 @@ void state_filter(State* state);
 // Utils
 void error(const char* message);
 void panic_if_null(void* ptr);
+
+
 
 #endif // CMENU_H

@@ -40,6 +40,8 @@ Behaviour:
     code 0.
 
     If the user presses ESC, the program exits with code 0.
+
+    Pressing and holding ALT whilst running will show shortcuts.
 ```
 
 ## Dependencies
@@ -93,6 +95,8 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] Build for windows (?)
 - [ ] Add timing reporting for first render
 - [ ] Add shortcut instructions to readme
+- [ ] Configurable shortcuts (eg IJKLM instead of UP/DOWN or different shortcut key)
+- [ ] Capture keystrokes before they get to the input field (eg shortcuts)
 
 ## Done 
 
@@ -117,3 +121,7 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - https://ulauncher.io/
 - https://github.com/Cloudef/bemenu
 - https://github.com/albertlauncher
+
+## Packaging
+
+See https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install

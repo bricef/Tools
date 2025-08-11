@@ -294,65 +294,45 @@ int draw_option(State* state, const Config* config, Font font, int x, int y, int
         );
     }
     return box_width;
-
-
 }
 
 void draw_horizontal(State* state, const Config* config, Font font){
-    // Draw
-        BeginDrawing();
-            ClearBackground(config->normal_background);
-            
-            int offset_x = 0;
-            int offset_y = 0;
+    int offset_x = 0;
+    int offset_y = 0;
 
-            int prompt_width = draw_prompt(state, config, font, offset_x, offset_y)+ config->padding;
-            offset_x += (prompt_width > 0 ? prompt_width : 0);
+    // Draw prompt
+    int prompt_width = draw_prompt(state, config, font, offset_x, offset_y) + config->padding;
+    offset_x += (prompt_width > 0 ? prompt_width : 0);
 
-            
-            int input_width = 200;
-            draw_input(state, config, font, offset_x, offset_y, input_width);
-            offset_x += input_width;
-    
-            for (int i = 0; i < state->filtered_options_count; i++){
-                int box_width = draw_option(state, config, font, offset_x, offset_y, i, state->filtered_options[i]);
-                offset_x += box_width;
-            }
+    // Draw input
+    int input_width = 200;
+    draw_input(state, config, font, offset_x, offset_y, input_width);
+    offset_x += input_width;
 
-            DrawRectangleLinesEx(
-                (Rectangle){ 0, 0, GetScreenWidth(), GetScreenHeight() }, 
-                (float) config->border_width, 
-                config->normal_foreground
-            );
-
-        EndDrawing();
+    // Draw options
+    for (int i = 0; i < state->filtered_options_count; i++){
+        int box_width = draw_option(state, config, font, offset_x, offset_y, i, state->filtered_options[i]);
+        offset_x += box_width;
+    }
 }
 
 void draw_vertical(State* state, const Config* config, Font font){
-    BeginDrawing();
-            ClearBackground(config->normal_background);
-            
-            int offset_x = 0;
-            int offset_y = 0;
-            
-            int prompt_width = draw_prompt(state, config, font, offset_x, offset_y) + config->padding;
-
-            int input_width = (GetScreenWidth() - prompt_width);
-            draw_input(state, config, font, offset_x+prompt_width, offset_y, input_width);
-            offset_y += config->height;
+    int offset_x = 0;
+    int offset_y = 0;
     
-            for (int i = 0; i < state->filtered_options_count; i++){
-                int box_width = draw_option(state, config, font, offset_x, offset_y, i, state->filtered_options[i]);
-                offset_y += config->height+config->padding*2;
-            }
+    // Draw prompt
+    int prompt_width = draw_prompt(state, config, font, offset_x, offset_y) + config->padding;
 
-            DrawRectangleLinesEx(
-                (Rectangle){ 0, 0, GetScreenWidth(), GetScreenHeight() }, 
-                (float) config->border_width, 
-                config->normal_foreground
-            );
+    // Draw input
+    int input_width = (GetScreenWidth() - prompt_width);
+    draw_input(state, config, font, offset_x + prompt_width, offset_y, input_width);
+    offset_y += config->height;
 
-        EndDrawing();
+    // Draw options
+    for (int i = 0; i < state->filtered_options_count; i++){
+        int box_width = draw_option(state, config, font, offset_x, offset_y, i, state->filtered_options[i]);
+        offset_y += config->height+config->padding*2;
+    }
 }
 
 
@@ -372,11 +352,23 @@ int run(State* state, const Config* config, Font font){
         handle_input(state);
         state_filter(state);
 
-        if (config->vertical){
-            draw_vertical(state, config, font);
-        }else{
-            draw_horizontal(state, config, font);
+        BeginDrawing();
+        {
+            ClearBackground(config->normal_background);
+
+            if (config->vertical){
+                draw_vertical(state, config, font);
+            }else{
+                draw_horizontal(state, config, font);
+            }
+
+            DrawRectangleLinesEx(
+                (Rectangle){ 0, 0, GetScreenWidth(), GetScreenHeight() }, 
+                (float) config->border_width, 
+                config->normal_foreground
+            );
         }
+        EndDrawing();
     }
     state->exit_status = CMENU_USER_QUIT;
     return state->exit_status;

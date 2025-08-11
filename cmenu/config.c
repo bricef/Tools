@@ -39,6 +39,8 @@ const char* helptext = "Usage: cmenu [options]\n"
 "    code 0.\n"
 "\n"
 "    If the user presses ESC, the program exits with code 0.\n"
+"\n"
+"    Pressing and holding ALT whilst running will show shortcuts.\n"
 ;
 
 const char* version = "0.0.1";

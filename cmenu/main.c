@@ -170,18 +170,19 @@ void handle_input(State* state){ // Could make state immutable by returning a ne
     if(IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_RIGHT)) {
         // printf("DOWN\n");
         state_select_next(state);
-        state->active++;
-        if (state->active >= state->filtered_options_count) state->active = 0;
     }
 
     if(IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_LEFT)) {
         // printf("UP\n");
         state_select_previous(state);
-        state->active--;
-        if (state->active < 0) state->active = state->filtered_options_count - 1;
     }
 
     if(IsKeyPressed(KEY_ENTER)) {
+        if (state->active > 0 ){
+            printf("%s\n", state->filtered_options[state->active]);
+            exit(0);
+        }
+        
         if (state->text[0] == '\0'){
             exit(0);
         }

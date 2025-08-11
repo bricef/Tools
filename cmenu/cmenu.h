@@ -5,7 +5,7 @@
 #ifndef CMENU_H
 #define CMENU_H
 
-
+#define MAX_INPUT_LENGTH 255
 
 typedef struct {
     bool bottom;
@@ -51,7 +51,7 @@ typedef struct {
     int filtered_options_count;
     const char** filtered_options;
     int focus;
-    char text[255];
+    char text[MAX_INPUT_LENGTH];
     bool show_shortcuts;
 } State;
 

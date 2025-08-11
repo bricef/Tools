@@ -87,7 +87,6 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] Support mouse click
 - [ ] Allow custom font
 - [ ] Enable custom colours
-- [ ] Fix arrow navigation and item selection highlight
 - [ ] Create test suite
 - [ ] Write launcher script (as per `dmenu_run`)
 - [ ] set up companion shell menu script (use `bmenu` format?)
@@ -95,9 +94,9 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 - [ ] Build for windows (?)
 - [ ] Add timing reporting for first render
 
-
 ## Done 
 
+- [x] Fix arrow navigation and item selection highlight
 - [x] Compress raw fonts and assets (using LZ4? Zstd?)
 - [x] Set up valgrind check
 - [x] Exit on lose focus by default, with option to prevent

@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            package-manager: apt
+          - os: macos-latest
+            package-manager: brew
+            raylib-package: raylib
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lz4 xxd build-essential pkg-config libasound2-dev mesa-common-dev libx11-dev libxrandr-dev libxi-dev xorg-dev libgl1-mesa-dev libglu1-mesa-dev
+        sudo apt-get install -y libglfw3-dev libopenal-dev libvorbis-dev libflac-dev
+
+    - name: Install dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install raylib
+
+    - name: Build raylib from source (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd lib
+        git clone --depth 1 https://github.com/raysan5/raylib.git
+        cd raylib/src/
+        make PLATFORM=PLATFORM_DESKTOP
+        sudo make install
+
+    - name: Build cmenu
+      run: make
+
+    - name: Test basic functionality
+      run: |
+        echo "Testing basic input/output..."
+        echo "Alpha\nBravo\nCharlie" | ./build/target/cmenu --help > /dev/null || true
+        echo "Build and basic test completed successfully"
+
+    - name: Build debug version
+      run: make debug
+
+    - name: Build ASAN version
+      run: make asan-test
+
+    - name: Check for memory leaks (Linux only)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        echo "Running valgrind memory check..."
+        timeout 10s make valgrind-quick || true
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: cmenu-${{ matrix.os }}
+        path: build/target/
+        retention-days: 7

@@ -125,3 +125,5 @@ There is support for memory leak testing described in [DEBUG.md](./DEBUG.md)
 ## Packaging
 
 See https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install
+
+Setting up CI: https://blog.reds.ch/?p=1956 See also https://github.com/nektos/act for local testing

@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"time"
 
+	flag "github.com/spf13/pflag"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
@@ -171,17 +172,38 @@ func beginning_of_day(t time.Time) time.Time {
 	return time.Date(year, month, day, 0, 0, 0, 0, t.Location())
 }
 
+func beginning_of_week(t time.Time) time.Time {
+	year, month, day := t.Date()
+	return time.Date(year, month, day-int(t.Weekday())+1, 0, 0, 0, 0, t.Location())
+}
+
 func main() {
+	// - [ ] Add a flag to show the current work week
+
+	var showCurrentWeek bool
+	flag.BoolVarP(&showCurrentWeek, "week", "w", true, "Show the current work week (default: true)")
+	flag.Parse()
+
+	var start time.Time
+	var end time.Time
+	now := time.Now()
+
+	if showCurrentWeek {
+		start = beginning_of_week(now)
+		end = start.AddDate(0, 0, 7)
+	} else {
+		start = beginning_of_day(time.Now())
+		end = start.AddDate(0, 0, 7)
+	}
+
 	srv := getCalendarService()
-	start := beginning_of_day(time.Now())
-	end := start.AddDate(0, 0, 7)
 	events := getEvents(srv, start, end)
 
 	if len(events) == 0 {
 		fmt.Println("No upcoming events found.")
 	} else {
-		currentDay := time.Now()
-		fmt.Printf("\n### %v\n\n", currentDay.Format("Monday 02"))
+		currentDay := start
+		fmt.Printf("\n### %v\n\n", start.Format("Monday 02"))
 
 		for _, event := range events {
 			if event.Type == "focusTime" ||

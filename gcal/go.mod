@@ -1,4 +1,4 @@
-module brice-automation
+module gcal
 
 go 1.23.2
 

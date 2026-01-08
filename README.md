@@ -13,7 +13,7 @@ My [Dotfiles](https://github.com/bricef/coding-challenges) which also include so
 ## Completed Tools
 
 - [**Broken link finder**](./broken-links-finder/) which scans websites for broken links.
-- [**google-automation**](./google-automation) allows downloading Google Calendar details in a markdown format compatible with Obsidian
+- [**gcal**](./gcal) allows downloading Google Calendar details in a markdown format compatible with Obsidian
 - [**bmenu**](./bmenu/) is a simple menu generator that uses a simple text-based definition format.
 - [**cmenu**](./cmenu/) is a cross-platform `dmenu` clone.
 - [**passgen**](./passgen/) includes tools and scripts for generating passwords and passphrases.

@@ -8,6 +8,11 @@ This is a collection of useful tools for interacting with google cloud services 
 
 - `gcal` calendar automator downloads the next ten days from your google calendar in a markdown format compatible with [Obsidian](https://obsidian.md/).
 
+## Install
+
+`gcal` can be installed with `go install` to the default `$GOBIN` path.
+
+
 ## Todo
 
 - [ ] Allow taking numdays parameter

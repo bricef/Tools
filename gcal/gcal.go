@@ -180,20 +180,23 @@ func beginning_of_week(t time.Time) time.Time {
 func main() {
 	// - [ ] Add a flag to show the current work week
 
-	var showCurrentWeek bool
-	flag.BoolVarP(&showCurrentWeek, "week", "w", true, "Show the current work week (default: true)")
+	var ndays int
+	flag.IntVarP(&ndays, "ndays", "n", 10, "Number of days to show")
 	flag.Parse()
+
+	fmt.Println()
 
 	var start time.Time
 	var end time.Time
 	now := time.Now()
 
-	if showCurrentWeek {
-		start = beginning_of_week(now)
-		end = start.AddDate(0, 0, 7)
-	} else {
+	if flag.Lookup("ndays").Changed {
 		start = beginning_of_day(time.Now())
 		end = start.AddDate(0, 0, 7)
+	} else {
+		start = beginning_of_week(now)
+		end = start.AddDate(0, 0, 7)
+
 	}
 
 	srv := getCalendarService()
@@ -223,4 +226,5 @@ func main() {
 			}
 		}
 	}
+	fmt.Println()
 }

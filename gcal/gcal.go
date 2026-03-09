@@ -18,6 +18,12 @@ import (
 	"google.golang.org/api/option"
 )
 
+type Config struct {
+	ConfigDir string
+	CredName  string
+	TokenName string
+}
+
 func getConfigdir() string {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
@@ -85,10 +91,9 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func getCalendarService() *calendar.Service {
-	configDir := getConfigdir()
-	credPath := filepath.Join(configDir, "credentials.json")
-	tokenPath := filepath.Join(configDir, "token.json")
+func getCalendarService(c Config) *calendar.Service {
+	credPath := filepath.Join(c.ConfigDir, c.CredName)
+	tokenPath := filepath.Join(c.ConfigDir, c.TokenName)
 
 	ctx := context.Background()
 	b, err := os.ReadFile(credPath)
@@ -199,7 +204,12 @@ func main() {
 
 	}
 
-	srv := getCalendarService()
+	c := Config{
+		ConfigDir: getConfigdir(),
+		CredName:  "credentials.json",
+		TokenName: "token.json",
+	}
+	srv := getCalendarService(c)
 	events := getEvents(srv, start, end)
 
 	if len(events) == 0 {

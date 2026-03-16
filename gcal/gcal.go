@@ -116,10 +116,11 @@ func getCalendarService(c Config) *calendar.Service {
 }
 
 type Event struct {
-	Summary string
-	AllDay  bool
-	Start   time.Time
-	Type    string
+	Summary  string
+	AllDay   bool
+	Start    time.Time
+	Type     string
+	Declined bool
 }
 
 func getEvents(srv *calendar.Service, start time.Time, end time.Time) []Event {
@@ -160,11 +161,20 @@ func getEvents(srv *calendar.Service, start time.Time, end time.Time) []Event {
 			}
 		}
 
+		declined := false
+		for _, attendee := range item.Attendees {
+			if attendee.Self && attendee.ResponseStatus == "declined" {
+				declined = true
+				break
+			}
+		}
+
 		events = append(events, Event{
-			Summary: item.Summary,
-			AllDay:  allDay,
-			Start:   start,
-			Type:    item.EventType,
+			Summary:  item.Summary,
+			AllDay:   allDay,
+			Start:    start,
+			Type:     item.EventType,
+			Declined: declined,
 		})
 
 	}
@@ -212,22 +222,21 @@ func main() {
 	srv := getCalendarService(c)
 	events := getEvents(srv, start, end)
 
-	if len(events) == 0 {
-		fmt.Println("No upcoming events found.")
-	} else {
-		currentDay := start
-		fmt.Printf("\n### %v\n\n", start.Format("Monday 02"))
+	for day := start; day.Before(end); day = day.AddDate(0, 0, 1) {
+		fmt.Printf("\n### %v\n\n", day.Format("Monday 02"))
 
 		for _, event := range events {
 			if event.Type == "focusTime" ||
 				event.Type == "workingLocation" ||
 				event.Type == "outOfOffice" ||
-				event.Summary == "🥗 Lunch" {
+				event.Summary == "🥗 Lunch" ||
+				event.Declined {
 				continue
 			}
-			if currentDay.Day() != event.Start.Day() {
-				currentDay = event.Start
-				fmt.Printf("\n### %v\n\n", currentDay.Format("Monday 02"))
+			ey, em, ed := event.Start.In(day.Location()).Date()
+			dy, dm, dd := day.Date()
+			if ey != dy || em != dm || ed != dd {
+				continue
 			}
 			if event.AllDay {
 				fmt.Printf("- **%v**\n", event.Summary)

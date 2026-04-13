@@ -9,12 +9,14 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 	"time"
 
 	flag "github.com/spf13/pflag"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 )
 
@@ -123,7 +125,15 @@ type Event struct {
 	Declined bool
 }
 
-func getEvents(srv *calendar.Service, start time.Time, end time.Time) []Event {
+func isAuthError(err error) bool {
+	if gErr, ok := err.(*googleapi.Error); ok && (gErr.Code == 401 || gErr.Code == 403) {
+		return true
+	}
+	errStr := err.Error()
+	return strings.Contains(errStr, "oauth2") || strings.Contains(errStr, "invalid_grant")
+}
+
+func getEvents(srv *calendar.Service, start time.Time, end time.Time) ([]Event, error) {
 	events := make([]Event, 0)
 
 	t := start.Format(time.RFC3339)
@@ -138,7 +148,7 @@ func getEvents(srv *calendar.Service, start time.Time, end time.Time) []Event {
 		Do()
 
 	if err != nil {
-		log.Fatalf("Unable to retrieve the user's events: %v", err)
+		return nil, err
 	}
 
 	for _, item := range items.Items {
@@ -179,7 +189,7 @@ func getEvents(srv *calendar.Service, start time.Time, end time.Time) []Event {
 
 	}
 
-	return events
+	return events, nil
 }
 
 func beginning_of_day(t time.Time) time.Time {
@@ -220,7 +230,21 @@ func main() {
 		TokenName: "token.json",
 	}
 	srv := getCalendarService(c)
-	events := getEvents(srv, start, end)
+	events, err := getEvents(srv, start, end)
+	if err != nil {
+		if isAuthError(err) {
+			tokenPath := filepath.Join(c.ConfigDir, c.TokenName)
+			os.Remove(tokenPath)
+			fmt.Fprintf(os.Stderr, "Authentication expired or revoked. Re-authenticating...\n\n")
+			srv = getCalendarService(c)
+			events, err = getEvents(srv, start, end)
+			if err != nil {
+				log.Fatalf("Unable to retrieve the user's events: %v", err)
+			}
+		} else {
+			log.Fatalf("Unable to retrieve the user's events: %v", err)
+		}
+	}
 
 	for day := start; day.Before(end); day = day.AddDate(0, 0, 1) {
 		fmt.Printf("\n### %v\n\n", day.Format("Monday 02"))

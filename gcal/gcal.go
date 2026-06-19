@@ -206,23 +206,28 @@ func main() {
 	// - [ ] Add a flag to show the current work week
 
 	var ndays int
-	flag.IntVarP(&ndays, "ndays", "n", 10, "Number of days to show")
+	var startStr string
+	flag.IntVarP(&ndays, "ndays", "n", 7, "Number of days to show")
+	flag.StringVarP(&startStr, "start", "s", "", "Start date (YYYY-MM-DD); defaults to the current week")
 	flag.Parse()
 
 	fmt.Println()
 
 	var start time.Time
-	var end time.Time
 	now := time.Now()
 
-	if flag.Lookup("ndays").Changed {
-		start = beginning_of_day(time.Now())
-		end = start.AddDate(0, 0, 7)
+	if startStr != "" {
+		parsed, err := time.ParseInLocation("2006-01-02", startStr, now.Location())
+		if err != nil {
+			log.Fatalf("Invalid --start date '%v', expected YYYY-MM-DD: %v", startStr, err)
+		}
+		start = beginning_of_day(parsed)
+	} else if flag.Lookup("ndays").Changed {
+		start = beginning_of_day(now)
 	} else {
 		start = beginning_of_week(now)
-		end = start.AddDate(0, 0, 7)
-
 	}
+	end := start.AddDate(0, 0, ndays)
 
 	c := Config{
 		ConfigDir: getConfigdir(),

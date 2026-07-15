@@ -1,6 +1,6 @@
 {
   "name": "issue-graph",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Render a GitHub repo's issue hierarchy (sub-issues) as a self-contained interactive HTML graph",
   "type": "module",
   "bin": {

@@ -17,6 +17,8 @@
     --open:      #1a7f37;
     --done:      #8250df;
     --skip:      #59636e;
+    --warn:      #9a6700;
+    --err:       #d03b3b;
     --open-wash: rgba(26, 127, 55, 0.07);
     --done-wash: rgba(130, 80, 223, 0.06);
     --skip-wash: rgba(89, 99, 110, 0.06);
@@ -35,6 +37,8 @@
       --open:      #3fb950;
       --done:      #ab7df8;
       --skip:      #9198a1;
+      --warn:      #d29922;
+      --err:       #f85149;
       --open-wash: rgba(63, 185, 80, 0.09);
       --done-wash: rgba(171, 125, 248, 0.09);
       --skip-wash: rgba(145, 152, 161, 0.08);
@@ -53,6 +57,8 @@
     --open:      #3fb950;
     --done:      #ab7df8;
     --skip:      #9198a1;
+    --warn:      #d29922;
+    --err:       #f85149;
     --open-wash: rgba(63, 185, 80, 0.09);
     --done-wash: rgba(171, 125, 248, 0.09);
     --skip-wash: rgba(145, 152, 161, 0.08);
@@ -114,6 +120,12 @@
   }
   .chip svg { width: 13px; height: 13px; flex: none; }
   .chip .n { font-family: ui-monospace, Menlo, monospace; font-weight: 600; color: var(--ink); }
+
+  .live[hidden] { display: none; }
+  .live .dot { width: 7px; height: 7px; border-radius: 999px; background: var(--muted); flex: none; }
+  .live.ok .dot { background: var(--open); }
+  .live.stale .dot { background: var(--warn); }
+  .live.err .dot { background: var(--err); }
 
   .controls { display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap; }
   .controls input[type="search"] {
@@ -215,6 +227,11 @@
   .node.s-skip { --c: var(--skip); --wash: var(--skip-wash); }
   .node:hover { border-color: var(--muted); }
   .node.dim { opacity: 0.18; }
+  @keyframes pulse-ring {
+    from { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 55%, transparent); }
+    to   { box-shadow: 0 0 0 16px transparent; }
+  }
+  .node.pulse { animation: pulse-ring 1.4s ease-out 2; }
   .node .icon { width: 15px; height: 15px; flex: none; margin-top: 2px; color: var(--c); }
   .node .body { min-width: 0; flex: 1; }
   .node .top { display: flex; gap: 6px; align-items: baseline; }
@@ -267,7 +284,6 @@
     border-radius: 8px;
     z-index: 1;
   }
-  .cover:hover ~ * {}
   .node:has(.cover:hover) { background: linear-gradient(var(--wash), var(--wash)) var(--surface); }
   .tog {
     position: relative;
@@ -330,6 +346,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
+    .node.pulse { animation: none; }
   }
 </style>
 </head>
@@ -341,6 +358,7 @@
     <div class="meta" id="meta"></div>
   </div>
   <div class="legend" id="legend" role="list" aria-label="Issue states"></div>
+  <span class="chip live" id="live" hidden role="status"><i class="dot"></i><span id="liveTxt"></span></span>
   <div class="controls">
     <input type="search" id="q" placeholder="Filter by #, title, label…" aria-label="Filter issues">
     <span id="matches"></span>
@@ -363,23 +381,27 @@
 <script>
 "use strict";
 const DATA = /*__DATA__*/null;
+const LIVE = /*__LIVE__*/null;
 
-/* ---------- model ---------- */
-const issues = DATA.issues;
-const byNumber = new Map(issues.map(i => [i.number, i]));
-for (const i of issues) i.children = [];
-for (const i of issues) {
-  const p = i.parent && i.parent.repo === DATA.repo ? byNumber.get(i.parent.number) : null;
-  i.parentNode = p || null;
-  i.extParent = i.parent && !p ? i.parent : null;
-  if (p) p.children.push(i);
+/* ---------- model (rebuilt from each data payload) ---------- */
+let issues = [], roots = [], unlinked = [];
+
+function buildModel(data) {
+  issues = data.issues;
+  const byNumber = new Map(issues.map(i => [i.number, i]));
+  for (const i of issues) i.children = [];
+  for (const i of issues) {
+    const p = i.parent && i.parent.repo === data.repo ? byNumber.get(i.parent.number) : null;
+    i.parentNode = p || null;
+    i.extParent = i.parent && !p ? i.parent : null;
+    if (p) p.children.push(i);
+  }
+  for (const i of issues) i.children.sort((a, b) => a.number - b.number);
+  roots = issues.filter(i => !i.parentNode && i.children.length)
+    .sort((a, b) => a.number - b.number);
+  unlinked = issues.filter(i => !i.parentNode && !i.children.length)
+    .sort((a, b) => (a.state === b.state ? a.number - b.number : a.state === "OPEN" ? -1 : 1));
 }
-for (const i of issues) i.children.sort((a, b) => a.number - b.number);
-
-const roots = issues.filter(i => !i.parentNode && i.children.length)
-  .sort((a, b) => a.number - b.number);
-const unlinked = issues.filter(i => !i.parentNode && !i.children.length)
-  .sort((a, b) => (a.state === b.state ? a.number - b.number : a.state === "OPEN" ? -1 : 1));
 
 function stateKey(i) {
   if (i.state === "OPEN") return "open";
@@ -398,12 +420,13 @@ function descendants(i) {
   return i.children.reduce((n, c) => n + 1 + descendants(c), 0);
 }
 
-/* ---------- ui state ---------- */
+/* ---------- ui state (survives data refreshes) ---------- */
 const collapsed = new Set();
 let hideDone = false;
-let showUnlinked = roots.length === 0 && unlinked.length > 0;
+let showUnlinked = false;
 let query = "";
 const view = { x: 20, y: 20, k: 1 };
+let firstLoad = true;
 
 const $ = s => document.querySelector(s);
 const canvas = $("#canvas"), world = $("#world"), tip = $("#tip");
@@ -736,32 +759,8 @@ $("#zOut").addEventListener("click", () =>
 $("#zFit").addEventListener("click", fit);
 
 /* ---------- header ---------- */
-function initHeader() {
-  const link = $("#repoLink");
-  link.href = `https://github.com/${DATA.repo}`;
-  const counts = { open: 0, done: 0, skip: 0 };
-  for (const i of issues) counts[stateKey(i)]++;
-  $("#meta").textContent =
-    `${issues.length} issues · ${roots.length} ${roots.length === 1 ? "tree" : "trees"}` +
-    ` · generated ${DATA.generatedAt.slice(0, 10)} ${DATA.generatedAt.slice(11, 16)} UTC`;
-
-  const legend = $("#legend");
-  for (const [k, label] of [["open", "open"], ["done", "done"], ["skip", "not planned"]]) {
-    if (!counts[k] && k === "skip") continue;
-    const c = el("span", "chip");
-    c.setAttribute("role", "listitem");
-    c.style.color = `var(--${k})`;
-    c.appendChild(svgIcon(k));
-    const t = el("span", null, "");
-    t.style.color = "var(--ink-2)";
-    t.appendChild(el("span", "n", String(counts[k])));
-    t.appendChild(document.createTextNode(" " + label));
-    c.appendChild(t);
-    legend.appendChild(c);
-  }
-
-  $("#unlinkedN").textContent = String(unlinked.length);
-  $("#showUnlinked").checked = showUnlinked;
+function wireControls() {
+  $("#repoLink").href = `https://github.com/${LIVE ? LIVE.repo : DATA.repo}`;
   $("#showUnlinked").addEventListener("change", e => { showUnlinked = e.target.checked; render(); });
   $("#hideDone").addEventListener("change", e => { hideDone = e.target.checked; render(); });
   $("#q").addEventListener("input", e => { query = e.target.value; applySearch(); });
@@ -779,9 +778,114 @@ function initHeader() {
   } catch {}
 }
 
-initHeader();
-render();
-fit();
+function renderHeader(data) {
+  const counts = { open: 0, done: 0, skip: 0 };
+  for (const i of issues) counts[stateKey(i)]++;
+  $("#meta").textContent =
+    `${issues.length} issues · ${roots.length} ${roots.length === 1 ? "tree" : "trees"}` +
+    ` · ${LIVE ? "updated" : "generated"} ${data.generatedAt.slice(0, 10)} ${data.generatedAt.slice(11, 16)} UTC`;
+
+  const legend = $("#legend");
+  legend.textContent = "";
+  for (const [k, label] of [["open", "open"], ["done", "done"], ["skip", "not planned"]]) {
+    if (!counts[k] && k === "skip") continue;
+    const c = el("span", "chip");
+    c.setAttribute("role", "listitem");
+    c.style.color = `var(--${k})`;
+    c.appendChild(svgIcon(k));
+    const t = el("span", null, "");
+    t.style.color = "var(--ink-2)";
+    t.appendChild(el("span", "n", String(counts[k])));
+    t.appendChild(document.createTextNode(" " + label));
+    c.appendChild(t);
+    legend.appendChild(c);
+  }
+
+  $("#unlinkedN").textContent = String(unlinked.length);
+}
+
+/* ---------- data lifecycle ---------- */
+const prevSig = new Map();
+function sigOf(i) {
+  return [i.state, i.stateReason, i.title, i.sub.done, i.sub.total,
+    i.parent ? `${i.parent.repo}#${i.parent.number}` : ""].join("");
+}
+
+function setData(data) {
+  const changed = [];
+  if (!firstLoad)
+    for (const i of data.issues)
+      if (prevSig.get(i.number) !== sigOf(i)) changed.push(i.number);
+  prevSig.clear();
+  for (const i of data.issues) prevSig.set(i.number, sigOf(i));
+
+  buildModel(data);
+  if (firstLoad) {
+    showUnlinked = roots.length === 0 && unlinked.length > 0;
+    $("#showUnlinked").checked = showUnlinked;
+  }
+  renderHeader(data);
+  render();
+  if (firstLoad) { fit(); firstLoad = false; }
+  else pulse(changed);
+}
+
+function pulse(nums) {
+  for (const num of nums) {
+    const d = world.querySelector(`.node[data-num="${num}"]`);
+    if (!d) continue;
+    d.classList.add("pulse");
+    setTimeout(() => d.classList.remove("pulse"), 3500);
+  }
+}
+
+/* ---------- live polling ---------- */
+function setBadge(kind, text, title) {
+  const b = $("#live");
+  b.hidden = false;
+  b.className = `chip live ${kind}`;
+  b.title = title || "";
+  $("#liveTxt").textContent = text;
+}
+
+let etag = null;
+async function poll(force) {
+  if (document.hidden && !firstLoad && !force) return;
+  try {
+    const r = await fetch(LIVE.dataUrl, {
+      headers: etag ? { "If-None-Match": etag } : {},
+      cache: "no-store",
+    });
+    if (r.status === 304) { setBadge("ok", "live", `checked ${new Date().toLocaleTimeString()}`); return; }
+    if (!r.ok) {
+      let msg = `HTTP ${r.status}`;
+      try { msg = (await r.json()).error || msg; } catch {}
+      throw new Error(msg);
+    }
+    const newTag = r.headers.get("ETag");
+    const data = await r.json();
+    const sameTag = newTag && newTag === etag;
+    etag = newTag ?? etag;
+    if (!sameTag || firstLoad) setData(data);
+    if (data.stale) setBadge("stale", "GitHub unreachable",
+      `showing data from ${data.generatedAt.slice(0, 10)} ${data.generatedAt.slice(11, 16)} UTC`);
+    else setBadge("ok", "live", `checked ${new Date().toLocaleTimeString()}`);
+  } catch (e) {
+    setBadge("err", "offline — retrying", e.message);
+  }
+}
+
+/* ---------- boot ---------- */
+wireControls();
+if (LIVE) {
+  setBadge("wait", "connecting…");
+  poll(true).then(() => {
+    setInterval(poll, Math.max(1, LIVE.interval) * 1000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) poll(); });
+  });
+} else {
+  setData(DATA);
+}
 </script>
 </body>
 </html>

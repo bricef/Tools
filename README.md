@@ -19,6 +19,7 @@ My [Dotfiles](https://github.com/bricef/coding-challenges) which also include so
 - [**passgen**](./passgen/) includes tools and scripts for generating passwords and passphrases.
 - [**rpg-utils**](./rpg-utils/) includes tools and utilities for Table Top Roleplaying Games, such as dice rollers and generators.
 - [**doctools**](./doctools/) has tools and utilities to manipulate documents and convert them into PDF
+- [**issue-graph**](./issue-graph/) renders a GitHub repository's sub-issue hierarchy as a self-contained interactive HTML graph, with a live-updating local server mode
 
 ## Work in Progress
 
